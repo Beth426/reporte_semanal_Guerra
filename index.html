@@ -1556,9 +1556,11 @@ function switchMode(mode) {
 }
 
 // ─── JSONBIN CONFIG ──────────────────────────────────────────────
-const JB_KEY    = '$2a$10$c8xsaF9mRINNycSm1K0Mn.BJnNkOYSPiz7LHgL3RTHXt0QgTo2Fda';
-const JB_BIN_LS = 'elitecol_binId';   // localStorage key for bin ID
-const JB_BASE   = 'https://api.jsonbin.io/v3';
+const JB_KEY        = '$2a$10$c8xsaF9mRINNycSm1K0Mn.BJnNkOYSPiz7LHgL3RTHXt0QgTo2Fda';
+const JB_ACCESS_KEY = '$2a$10$/Hj4n3OAy5ji6IfpqqILLOzE2.XfdQ8QC8/0Qm3IkNQE2xTReVGQu';
+const JB_BIN_ID     = '6a1cb91121f9ee59d2a29678'; // Bin fijo público elite-colombia-war
+const JB_BIN_LS     = 'elitecol_binId';
+const JB_BASE       = 'https://api.jsonbin.io/v3';
 
 // ─── JSONBIN HELPERS ─────────────────────────────────────────────
 async function jbSave(players, weeks) {
@@ -1569,21 +1571,21 @@ async function jbSave(players, weeks) {
     totalFame: players.reduce((s,p)=>s+(p.weeks[weeks[0]]?.fame||0),0),
     memberCount: players.length,
   };
-  const binId = localStorage.getItem(JB_BIN_LS);
+  const binId = JB_BIN_ID; // Always use fixed bin ID
   try {
     let res, data;
     if (binId) {
       // Update existing bin
       res = await fetch(JB_BASE+'/b/'+binId, {
         method: 'PUT',
-        headers: {'Content-Type':'application/json','X-Master-Key':JB_KEY},
+        headers: {'Content-Type':'application/json','X-Access-Key':JB_ACCESS_KEY},
         body: JSON.stringify(payload)
       });
     } else {
       // Create new bin
       res = await fetch(JB_BASE+'/b', {
         method: 'POST',
-        headers: {'Content-Type':'application/json','X-Master-Key':JB_KEY,'X-Bin-Name':'elite-colombia-war','X-Bin-Private':'false'},
+        headers: {'Content-Type':'application/json','X-Access-Key':JB_ACCESS_KEY,'X-Bin-Name':'elite-colombia-war'},
         body: JSON.stringify(payload)
       });
     }
@@ -1601,16 +1603,21 @@ async function jbSave(players, weeks) {
 }
 
 async function jbLoad() {
-  const binId = localStorage.getItem(JB_BIN_LS);
-  if (binId) {
-    try {
-      const res = await fetch(JB_BASE+'/b/'+binId+'/latest', {
-        headers: {'X-Master-Key':JB_KEY}
-      });
+  // Always use the fixed public bin ID — readable without auth
+  const binId = JB_BIN_ID;
+  try {
+    const res = await fetch(JB_BASE+'/b/'+binId+'/latest', {
+      headers: {'X-Access-Key': JB_ACCESS_KEY}
+    });
+    if (res.ok) {
       const data = await res.json();
-      if (data?.record) return data.record;
-    } catch(e) { console.warn('JSONBin load failed:', e); }
-  }
+      if (data?.record?.players?.length) {
+        // Cache locally for offline fallback
+        localStorage.setItem('elitecol_snapshot', JSON.stringify(data.record));
+        return data.record;
+      }
+    }
+  } catch(e) { console.warn('JSONBin load failed, trying cache:', e); }
   // Fallback: localStorage cache
   try {
     const raw = localStorage.getItem('elitecol_snapshot');
