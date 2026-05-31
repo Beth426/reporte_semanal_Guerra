@@ -1,504 +1,870 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>ELITE COLOMBIA · Dashboard War | Clash Royale</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Montserrat', sans-serif; transition: background 0.3s ease, color 0.3s ease; padding: 2rem 1.5rem; min-height: 100vh; }
-        body.dark { background: radial-gradient(ellipse at 20% 30%, #0a0f1e, #03060c); color: #eef2ff; }
-        body.light { background: #f0f2f5; color: #1a1e2c; }
-        .container { max-width: 1400px; margin: 0 auto; }
-        .clan-header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1.5rem; margin-bottom: 2rem; padding: 1rem 1.5rem; background: rgba(17, 22, 31, 0.6); backdrop-filter: blur(10px); border-radius: 48px; border: 1px solid rgba(245, 197, 24, 0.2); }
-        .title h1 { font-family: 'Rajdhani', monospace; font-weight: 800; font-size: clamp(1.8rem, 5vw, 2.5rem); background: linear-gradient(135deg, #f5c518, #ff8c00, #f5c518); -webkit-background-clip: text; background-clip: text; color: transparent; }
-        .title p { font-size: 0.8rem; opacity: 0.7; }
-        .header-actions { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
-        .theme-toggle, .btn-action { background: linear-gradient(135deg, #1e2632, #151e2a); border: 1px solid rgba(245, 197, 24, 0.3); border-radius: 40px; padding: 0.6rem 1.2rem; cursor: pointer; color: #f5c518; font-weight: 700; font-size: 0.85rem; transition: all 0.2s; font-family: 'Rajdhani', monospace; }
-        .theme-toggle:hover, .btn-action:hover { background: linear-gradient(135deg, #f5c518, #ff8c00); color: #0a0f1e; transform: translateY(-2px); box-shadow: 0 4px 15px rgba(245, 197, 24, 0.3); }
-        .week-selector { background: rgba(17, 22, 31, 0.8); backdrop-filter: blur(5px); padding: 0.5rem 1rem; border-radius: 40px; display: flex; align-items: center; gap: 0.8rem; border: 1px solid rgba(245, 197, 24, 0.2); }
-        .week-selector label { font-weight: 600; font-size: 0.8rem; color: #f5c518; }
-        select { background: #1e2632; border: 1px solid #2e3a48; color: white; font-family: 'Rajdhani', monospace; font-weight: 600; padding: 0.4rem 1rem; border-radius: 30px; cursor: pointer; }
-        .tabs { display: flex; gap: 0.5rem; margin: 2rem 0 1.5rem; background: rgba(17, 22, 31, 0.4); backdrop-filter: blur(5px); border-radius: 60px; padding: 0.3rem; width: fit-content; }
-        .tab-btn { background: transparent; border: none; color: #8e9bb5; font-family: 'Rajdhani', monospace; font-weight: 700; font-size: 0.9rem; padding: 0.6rem 1.5rem; cursor: pointer; border-radius: 40px; transition: all 0.2s; }
-        .tab-btn.active { background: linear-gradient(135deg, #f5c518, #ff8c00); color: #0a0f1e; box-shadow: 0 2px 10px rgba(245, 197, 24, 0.3); }
-        .tab-pane { display: none; animation: fadeIn 0.3s ease; }
-        .tab-pane.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .search-bar { margin: 1rem 0 1.5rem; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 1rem; align-items: center; }
-        .search-bar input { background: rgba(16, 22, 31, 0.9); border: 1px solid rgba(245, 197, 24, 0.3); border-radius: 40px; padding: 0.7rem 1.5rem; width: 280px; color: white; outline: none; }
-        .search-bar input:focus { border-color: #f5c518; box-shadow: 0 0 10px rgba(245, 197, 24, 0.2); }
-        .filters { display: flex; gap: 0.8rem; flex-wrap: wrap; }
-        .filter-select { background: rgba(16, 22, 31, 0.9); border: 1px solid rgba(245, 197, 24, 0.3); border-radius: 40px; padding: 0.5rem 1.2rem; color: white; font-family: 'Rajdhani', monospace; cursor: pointer; }
-        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 1.2rem; margin-bottom: 2rem; }
-        .kpi-card { background: linear-gradient(135deg, rgba(17, 22, 31, 0.9), rgba(10, 15, 24, 0.9)); backdrop-filter: blur(5px); border-radius: 24px; padding: 1.2rem; border-left: 4px solid; transition: all 0.25s; box-shadow: 0 8px 20px rgba(0,0,0,0.3); }
-        .kpi-card:hover { transform: translateY(-5px); }
-        .kpi-title { font-size: 0.7rem; text-transform: uppercase; color: #b9c3dd; margin-bottom: 0.5rem; }
-        .kpi-value { font-family: 'Rajdhani', monospace; font-weight: 800; font-size: 2rem; }
-        .kpi-trend { font-size: 0.7rem; margin-top: 6px; display: flex; align-items: center; gap: 4px; }
-        .trend-up { color: #00d97e; }
-        .trend-down { color: #f02040; }
-        .leaderboard { background: linear-gradient(135deg, rgba(12, 17, 26, 0.95), rgba(8, 12, 20, 0.95)); border-radius: 28px; padding: 1.5rem; margin-bottom: 2rem; border: 1px solid rgba(245, 197, 24, 0.2); }
-        .leaderboard h3 { font-family: 'Rajdhani', monospace; font-size: 1.3rem; margin-bottom: 1.2rem; color: #f5c518; }
-        .lb-item { display: flex; align-items: center; gap: 1rem; padding: 0.7rem 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .lb-rank { font-weight: 800; width: 50px; font-size: 1.4rem; }
-        .lb-name { flex: 2; font-weight: 600; font-size: 0.9rem; }
-        .lb-fame { font-family: 'Rajdhani', monospace; font-weight: 800; width: 70px; text-align: right; font-size: 1.1rem; color: #f5c518; }
-        .progress-bar-bg { flex: 3; height: 10px; background: rgba(38, 46, 60, 0.8); border-radius: 10px; overflow: hidden; }
-        .progress-fill { height: 100%; background: linear-gradient(90deg, #f5c518, #ff8c00); border-radius: 10px; }
-        .comparison-box { display: flex; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 2rem; }
-        .comparison-card { flex: 1; background: linear-gradient(135deg, rgba(12, 17, 26, 0.9), rgba(8, 12, 20, 0.9)); border-radius: 20px; padding: 1.2rem; border-left: 3px solid #f5c518; }
-        .comparison-card h4 { font-family: 'Rajdhani', monospace; font-size: 1rem; margin-bottom: 0.8rem; color: #f5c518; }
-        .comparison-card div { font-size: 0.8rem; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .insight { background: linear-gradient(135deg, rgba(245,197,24,0.1), rgba(255,140,0,0.05)); border-radius: 20px; padding: 1rem 1.5rem; margin-bottom: 1.5rem; border-left: 4px solid #f5c518; font-size: 0.9rem; }
-        .table-wrapper { overflow-x: auto; margin-bottom: 1.5rem; background: linear-gradient(135deg, rgba(12,17,26,0.9), rgba(8,12,20,0.9)); border-radius: 20px; border: 1px solid rgba(245,197,24,0.1); }
-        table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
-        th { text-align: left; padding: 1rem 0.8rem; background: rgba(21,30,42,0.8); font-family: 'Rajdhani', monospace; font-weight: 700; color: #f5c518; cursor: pointer; }
-        th:hover { background: rgba(245,197,24,0.2); }
-        td { padding: 0.8rem 0.8rem; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .badge { display: inline-block; padding: 0.25rem 0.8rem; border-radius: 40px; font-size: 0.7rem; font-weight: 700; }
-        .badge-ascend { background: linear-gradient(135deg, rgba(245,197,24,0.2), rgba(255,140,0,0.1)); color: #f5c518; border: 1px solid rgba(245,197,24,0.5); }
-        .badge-keep { background: rgba(41,121,255,0.2); color: #7aaaff; border: 1px solid rgba(41,121,255,0.5); }
-        .badge-expel { background: rgba(240,32,64,0.2); color: #f66; border: 1px solid rgba(240,32,64,0.5); }
-        .badge-observation { background: rgba(255,140,0,0.2); color: #ffaa44; border: 1px solid rgba(255,140,0,0.5); }
-        .collapsible { cursor: pointer; padding: 0.8rem 1.2rem; background: linear-gradient(135deg, rgba(10,16,24,0.9), rgba(5,10,16,0.9)); border-radius: 30px; margin-bottom: 0.6rem; display: flex; justify-content: space-between; font-weight: 700; font-family: 'Rajdhani', monospace; border: 1px solid rgba(245,197,24,0.2); }
-        .collapsible:hover { background: linear-gradient(135deg, rgba(245,197,24,0.1), rgba(255,140,0,0.05)); }
-        .collapsible-content { max-height: 0; opacity: 0; overflow: hidden; transition: max-height 0.4s ease, opacity 0.3s; }
-        .collapsible-content.show { max-height: 3000px; opacity: 1; }
-        .chevron { transition: transform 0.3s; }
-        .collapsible.active .chevron { transform: rotate(180deg); }
-        .charts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
-        .chart-card { background: linear-gradient(135deg, rgba(12,17,26,0.9), rgba(8,12,20,0.9)); border-radius: 24px; padding: 1.2rem; border: 1px solid rgba(245,197,24,0.15); }
-        .chart-card h4 { font-family: 'Rajdhani', monospace; font-size: 1.1rem; margin-bottom: 1rem; color: #f5c518; display: flex; align-items: center; gap: 8px; }
-        canvas { max-height: 280px; width: 100%; }
-        .heatmap-cell { text-align: center; font-weight: 700; border-radius: 10px; padding: 6px 4px; background: #111a24; }
-        .heatmap-ascend { background: linear-gradient(135deg, #f5c51830, #ff8c0030); color: #ffdf7e; }
-        .heatmap-keep { background: #2979ff30; color: #a0c4ff; }
-        .heatmap-expel { background: #f0204030; color: #ff8989; }
-        .heatmap-na { background: #1e293b; color: #5b6e8c; }
-        footer { margin-top: 3rem; text-align: center; font-size: 0.7rem; opacity: 0.5; padding: 1rem; }
-        @media (max-width: 700px) { body { padding: 1rem; } .kpi-value { font-size: 1.3rem; } .charts-grid { grid-template-columns: 1fr; } }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ELITE COLOMBIA · Dashboard War</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --gold:#f5c518;--gold2:#ff8c00;--red:#f02040;--green:#00d97e;--blue:#2979ff;--obs:#ff9800;--purple:#9c27b0;
+  --bg:#070d18;--bg2:#0d1625;--bg3:#131e30;--surface:#1a2540;--border:rgba(245,197,24,.13);
+  --text:#eef2ff;--muted:#8e9bb5;--hint:#3d4f68;
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);padding:1.5rem;min-height:100vh}
+body.light{--bg:#f0f4f8;--bg2:#e4eaf2;--bg3:#fff;--surface:#fff;--border:rgba(0,0,0,.09);--text:#1a202c;--muted:#4a5568;--hint:#a0aec0}
+.container{max-width:1440px;margin:0 auto}
+
+/* HEADER */
+.clan-header{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:1rem;margin-bottom:1.5rem;padding:.85rem 1.5rem;background:var(--bg2);border-radius:50px;border:1px solid var(--border)}
+.title h1{font-family:'Rajdhani',sans-serif;font-weight:800;font-size:clamp(1.5rem,4vw,2.1rem);background:linear-gradient(135deg,#f5c518,#ff8c00,#f5c518);-webkit-background-clip:text;background-clip:text;color:transparent}
+.title p{font-size:.72rem;color:var(--muted);margin-top:1px}
+.header-actions{display:flex;gap:.6rem;align-items:center;flex-wrap:wrap}
+.btn-pill{background:var(--bg3);border:1px solid var(--border);border-radius:40px;padding:.45rem 1rem;cursor:pointer;color:var(--gold);font-weight:600;font-size:.78rem;transition:all .2s;font-family:'Rajdhani',sans-serif;white-space:nowrap}
+.btn-pill:hover{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#07101e;transform:translateY(-1px)}
+.week-wrap{display:flex;align-items:center;gap:.5rem;background:var(--bg3);border:1px solid var(--border);border-radius:30px;padding:.4rem .9rem}
+.week-wrap label{font-size:.72rem;color:var(--gold);font-weight:700;font-family:'Rajdhani',sans-serif}
+select.week-sel{background:transparent;border:none;color:var(--text);font-family:'Rajdhani',sans-serif;font-weight:600;font-size:.8rem;cursor:pointer;outline:none}
+
+/* TABS */
+.tabs{display:flex;gap:.3rem;margin:1.5rem 0 1.2rem;background:var(--bg2);border-radius:50px;padding:.22rem;width:fit-content;flex-wrap:wrap}
+.tab-btn{background:transparent;border:none;color:var(--muted);font-family:'Rajdhani',sans-serif;font-weight:700;font-size:.82rem;padding:.45rem 1.1rem;cursor:pointer;border-radius:40px;transition:all .2s;white-space:nowrap}
+.tab-btn.active{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#07101e}
+.tab-pane{display:none;animation:fadeIn .25s ease}
+.tab-pane.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* KPI */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:.9rem;margin-bottom:1.4rem}
+.kpi-card{background:var(--bg2);border-radius:18px;padding:1rem 1.1rem;border-left:3px solid var(--gold);transition:transform .2s}
+.kpi-card:hover{transform:translateY(-3px)}
+.kpi-card.red{border-left-color:var(--red)}
+.kpi-card.green{border-left-color:var(--green)}
+.kpi-card.blue{border-left-color:var(--blue)}
+.kpi-card.purple{border-left-color:var(--purple)}
+.kpi-title{font-size:.62rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:.35rem}
+.kpi-value{font-family:'Rajdhani',sans-serif;font-weight:800;font-size:1.65rem;color:var(--text);line-height:1.1}
+.kpi-sub{font-size:.65rem;color:var(--muted);margin-top:3px}
+.kpi-trend{font-size:.65rem;margin-top:4px;display:flex;align-items:center;gap:3px}
+.t-up{color:var(--green)}.t-dn{color:var(--red)}.t-eq{color:var(--hint)}
+
+/* TOOLBAR */
+.toolbar{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center;margin-bottom:1.1rem}
+.toolbar input,.toolbar select{background:var(--bg2);border:1px solid var(--border);border-radius:30px;padding:.48rem 1rem;color:var(--text);font-size:.78rem;outline:none;transition:border-color .2s;font-family:'Inter',sans-serif}
+.toolbar input{width:210px}
+.toolbar input:focus{border-color:var(--gold)}
+.toolbar select{cursor:pointer}
+
+/* LEADERBOARD */
+.leaderboard{background:var(--bg2);border-radius:22px;padding:1.1rem 1.3rem;margin-bottom:1.3rem;border:1px solid var(--border)}
+.section-title{font-family:'Rajdhani',sans-serif;font-size:1.05rem;color:var(--gold);margin-bottom:.9rem;display:flex;align-items:center;gap:.5rem}
+.lb-item{display:flex;align-items:center;gap:.8rem;padding:.5rem 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.lb-item:last-child{border-bottom:none}
+.lb-rank{font-weight:700;width:32px;text-align:center;font-size:1.1rem}
+.lb-name{flex:2;font-size:.82rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lb-bar-bg{flex:3;height:6px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden}
+.lb-bar-fill{height:6px;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:3px;transition:width .8s ease}
+.lb-fame{font-family:'Rajdhani',sans-serif;font-weight:700;min-width:52px;text-align:right;color:var(--gold);font-size:.95rem}
+
+/* CHANGES */
+.changes-row{display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1.3rem}
+.change-card{flex:1;min-width:170px;background:var(--bg2);border-radius:16px;padding:.9rem 1.1rem;border-left:3px solid}
+.change-card h4{font-family:'Rajdhani',sans-serif;font-size:.9rem;margin-bottom:.6rem}
+.change-item{font-size:.75rem;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.04);display:flex;justify-content:space-between;gap:6px}
+.change-item span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* INSIGHT */
+.insight{background:linear-gradient(135deg,rgba(245,197,24,.07),rgba(255,140,0,.03));border-radius:16px;padding:.85rem 1.2rem;margin-bottom:1.3rem;border-left:4px solid var(--gold);font-size:.8rem;line-height:1.75}
+
+/* ALERT BOX */
+.alert-box{background:rgba(240,32,64,.07);border-left:4px solid var(--red);border-radius:16px;padding:.85rem 1.2rem;margin-bottom:1.3rem;font-size:.8rem;line-height:1.8}
+.alert-box .alert-title{font-family:'Rajdhani',sans-serif;color:var(--red);font-size:1rem;margin-bottom:.4rem}
+
+/* COLLAPSIBLE */
+.collapsible{cursor:pointer;padding:.7rem 1.1rem;background:var(--bg2);border-radius:30px;margin-bottom:.45rem;display:flex;justify-content:space-between;align-items:center;font-weight:700;font-family:'Rajdhani',sans-serif;font-size:.87rem;border:1px solid var(--border);transition:background .2s;user-select:none}
+.collapsible:hover{background:var(--surface)}
+.collapsible-content{max-height:0;opacity:0;overflow:hidden;transition:max-height .4s ease,opacity .3s}
+.collapsible-content.show{max-height:5000px;opacity:1}
+.chevron{transition:transform .3s;font-size:.75rem}
+.collapsible.open .chevron{transform:rotate(180deg)}
+
+/* TABLE */
+.tbl-wrap{overflow-x:auto;background:var(--bg2);border-radius:16px;border:1px solid var(--border);margin-bottom:.6rem}
+table{width:100%;border-collapse:collapse;font-size:.76rem}
+th{text-align:left;padding:.8rem .75rem;background:rgba(245,197,24,.05);font-family:'Rajdhani',sans-serif;font-weight:700;color:var(--gold);cursor:pointer;white-space:nowrap;user-select:none}
+th:hover{background:rgba(245,197,24,.1)}
+td{padding:.7rem .75rem;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,.02)}
+
+/* BADGES */
+.badge{display:inline-block;padding:.18rem .65rem;border-radius:30px;font-size:.67rem;font-weight:700;white-space:nowrap}
+.b-ascend{background:rgba(245,197,24,.14);color:var(--gold);border:1px solid rgba(245,197,24,.35)}
+.b-keep{background:rgba(41,121,255,.14);color:#7aaaff;border:1px solid rgba(41,121,255,.35)}
+.b-expel{background:rgba(240,32,64,.14);color:#ff7a7a;border:1px solid rgba(240,32,64,.35)}
+.b-obs{background:rgba(255,152,0,.14);color:#ffb74d;border:1px solid rgba(255,152,0,.35)}
+.b-leader{background:rgba(245,197,24,.18);color:var(--gold)}
+.b-coleader{background:rgba(156,39,176,.18);color:#ce9ef7}
+.b-elder{background:rgba(41,121,255,.18);color:#90c8ff}
+.b-member{background:rgba(142,155,181,.1);color:var(--muted)}
+
+/* FAME MINI BAR */
+.fame-cell{display:flex;align-items:center;gap:5px}
+.fame-bar-bg{flex:1;min-width:35px;height:4px;background:rgba(255,255,255,.07);border-radius:2px;overflow:hidden}
+.fame-bar-fill{height:4px;border-radius:2px}
+.t-up{color:var(--green)}.t-dn{color:var(--red)}.t-eq{color:var(--hint)}
+
+/* STREAK BADGE */
+.streak{display:inline-flex;align-items:center;gap:3px;background:rgba(245,197,24,.12);border:1px solid rgba(245,197,24,.25);border-radius:20px;padding:.15rem .55rem;font-size:.65rem;font-weight:700;color:var(--gold)}
+
+/* HEATMAP */
+.hm-cell{text-align:center;font-weight:700;border-radius:7px;padding:4px 2px;font-size:.7rem}
+.hm-gold{background:rgba(245,197,24,.18);color:#ffe082}
+.hm-keep{background:rgba(41,121,255,.14);color:#90c8ff}
+.hm-expel{background:rgba(240,32,64,.13);color:#ff8a8a}
+.hm-na{background:rgba(255,255,255,.03);color:var(--hint)}
+
+/* CHARTS */
+.charts-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:1.1rem;margin-bottom:1.3rem}
+.chart-card{background:var(--bg2);border-radius:20px;padding:1.1rem 1.3rem;border:1px solid var(--border)}
+.chart-card h4{font-family:'Rajdhani',sans-serif;font-size:.95rem;color:var(--gold);margin-bottom:.9rem}
+canvas{width:100%!important}
+
+/* RANKING TAB */
+.ranking-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:.9rem;margin-bottom:1.3rem}
+.rank-card{background:var(--bg2);border-radius:16px;padding:.9rem 1.1rem;border:1px solid var(--border);transition:transform .2s}
+.rank-card:hover{transform:translateY(-2px)}
+.rank-card-top{display:flex;align-items:center;gap:.7rem;margin-bottom:.6rem}
+.rank-num{font-family:'Rajdhani',sans-serif;font-weight:800;font-size:1.4rem;color:var(--gold);min-width:28px}
+.rank-name{font-weight:600;font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rank-sub{font-size:.7rem;color:var(--muted)}
+.rank-stats{display:flex;gap:.5rem;flex-wrap:wrap}
+.rank-stat{background:var(--bg3);border-radius:8px;padding:.25rem .55rem;font-size:.68rem;color:var(--muted)}
+.rank-stat span{color:var(--text);font-weight:600}
+
+/* ALERTS / ZERO PARTICIPATION */
+.zero-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.7rem;margin-top:.5rem}
+.zero-card{background:rgba(240,32,64,.06);border:1px solid rgba(240,32,64,.2);border-radius:14px;padding:.75rem 1rem}
+.zero-name{font-weight:600;font-size:.82rem;margin-bottom:.25rem}
+.zero-weeks{font-size:.7rem;color:var(--muted)}
+
+/* EFF LIST */
+.eff-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:.45rem;margin-top:.7rem}
+.eff-item{background:rgba(245,197,24,.06);border-radius:10px;padding:.45rem .75rem;font-size:.73rem;display:flex;justify-content:space-between;align-items:center}
+.eff-val{color:var(--gold);font-weight:700;font-family:'Rajdhani',sans-serif;font-size:.9rem}
+
+footer{margin-top:2rem;text-align:center;font-size:.65rem;color:var(--hint);padding:.8rem;border-top:1px solid var(--border)}
+@media(max-width:700px){body{padding:.7rem}.kpi-value{font-size:1.3rem}.charts-grid{grid-template-columns:1fr}.ranking-grid{grid-template-columns:1fr}.changes-row{flex-direction:column}}
+</style>
 </head>
 <body class="dark">
 <div class="container">
-    <div class="clan-header">
-        <div class="title">
-            <h1>⚔️ ELITE COLOMBIA</h1>
-            <p>#GLRVYPLL · Guerra de Clanes · River Race</p>
-        </div>
-        <div class="header-actions">
-            <button class="theme-toggle" id="themeToggle">🌓 Modo Claro</button>
-            <div class="week-selector">
-                <label>📅 SEMANA:</label>
-                <select id="weekSelect"></select>
-            </div>
-        </div>
+
+<div class="clan-header">
+  <div class="title">
+    <h1>⚔️ ELITE COLOMBIA</h1>
+    <p>#GLRVYPLL · Guerra de Clanes · River Race · 50 miembros</p>
+  </div>
+  <div class="header-actions">
+    <button class="btn-pill" id="themeToggle">🌓 Modo Claro</button>
+    <div class="week-wrap">
+      <label>📅 SEMANA:</label>
+      <select class="week-sel" id="weekSelect"></select>
     </div>
+  </div>
+</div>
 
-    <div class="tabs">
-        <button class="tab-btn active" data-tab="weekly">📊 Semana Actual</button>
-        <button class="tab-btn" data-tab="historical">📈 Histórica</button>
-        <button class="tab-btn" data-tab="analytics">📉 Analytics</button>
+<div class="tabs">
+  <button class="tab-btn active" data-tab="weekly">📊 Semana</button>
+  <button class="tab-btn" data-tab="historical">🗓️ Histórica</button>
+  <button class="tab-btn" data-tab="ranking">🏅 Ranking</button>
+  <button class="tab-btn" data-tab="analytics">📉 Analytics</button>
+  <button class="tab-btn" data-tab="alerts">🚨 Alertas</button>
+</div>
+
+<!-- ═══════ SEMANA ═══════ -->
+<div id="weeklyTab" class="tab-pane active">
+  <div class="toolbar">
+    <input type="text" id="weeklySearch" placeholder="🔍 Buscar jugador... (Ctrl+F)">
+    <select id="roleFilter">
+      <option value="all">🎭 Todos los roles</option>
+      <option value="leader">👑 Líder</option>
+      <option value="coLeader">⚜️ Colíder</option>
+      <option value="elder">⭐ Veterano</option>
+      <option value="member">🛡️ Miembro</option>
+    </select>
+    <select id="trophyFilter">
+      <option value="all">🏆 Todos trofeos</option>
+      <option value="10000+">💎 10 000+</option>
+      <option value="5000-9999">📈 5 000–9 999</option>
+      <option value="0-4999">📉 0–4 999</option>
+    </select>
+    <select id="verdictFilter">
+      <option value="all">✅ Todos veredictos</option>
+      <option value="ascend">⬆️ Asciende</option>
+      <option value="keep">✔️ Se mantiene</option>
+      <option value="expel">❌ Expulsión</option>
+      <option value="observation">🆕 Observación</option>
+    </select>
+    <button class="btn-pill" id="copyActionsBtn">📋 Copiar acciones</button>
+    <button class="btn-pill" id="exportCSVBtn">📥 CSV</button>
+  </div>
+
+  <div class="kpi-grid" id="kpiContainer"></div>
+  <div class="leaderboard" id="leaderboard"></div>
+  <div class="changes-row" id="topChanges"></div>
+  <div class="insight" id="insightMessage"></div>
+
+  <div class="collapsible open" data-target="mainCollapse">
+    <span>📋 Tabla completa de miembros</span><span class="chevron">▼</span>
+  </div>
+  <div id="mainCollapse" class="collapsible-content show">
+    <div class="tbl-wrap">
+      <table><thead><tr>
+        <th data-sort="rank">#</th>
+        <th data-sort="name">👤 Jugador</th>
+        <th data-sort="role">🎭 Rol</th>
+        <th data-sort="trophies">🏆 Trofeos</th>
+        <th data-sort="fame">⚔️ Fama</th>
+        <th data-sort="decks">🃏 Mazos</th>
+        <th data-sort="efic">⚡ Efic.</th>
+        <th data-sort="streak">🔥 Racha</th>
+        <th data-sort="delta">📈 vs Ant.</th>
+        <th data-sort="verdict">✅ Veredicto</th>
+        <th>💡 Acción</th>
+      </tr></thead>
+      <tbody id="mainTbody"></tbody></table>
     </div>
+  </div>
 
-    <!-- Pestaña Semanal -->
-    <div id="weeklyTab" class="tab-pane active">
-        <div class="search-bar">
-            <input type="text" id="weeklySearch" placeholder="🔍 Filtrar jugador... (Ctrl+F)">
-            <div class="filters">
-                <select id="roleFilter" class="filter-select"><option value="all">🎭 Todos los roles</option><option value="member">🛡️ Miembro</option><option value="elder">⭐ Veterano</option><option value="coLeader">👑 Colíder</option><option value="leader">🏆 Líder</option></select>
-                <select id="trophyFilter" class="filter-select"><option value="all">🏆 Todos trofeos</option><option value="0-4999">📉 0-4999</option><option value="5000-9999">📈 5000-9999</option><option value="10000+">💎 10000+</option></select>
-                <button class="btn-action" id="copyActionsBtn">📋 Copiar acciones</button>
-                <button class="btn-action" id="exportCSVBtn">📥 Exportar CSV</button>
-            </div>
-        </div>
-        <div class="kpi-grid" id="kpiContainer"></div>
-        <div class="leaderboard" id="leaderboard"></div>
-        <div class="comparison-box" id="topChanges"></div>
-        <div class="insight" id="insightMessage"></div>
-
-        <div class="collapsible" data-target="veredictCollapse"><span>📋 Tabla completa de miembros</span><span class="chevron">▼</span></div>
-        <div id="veredictCollapse" class="collapsible-content show"><div class="table-wrapper"><table id="mainTable"><thead id="mainThead"><tr><th data-sort="name">👤 Jugador</th><th data-sort="trophies">🏆 Trofeos</th><th data-sort="role">🎭 Rol</th><th data-sort="fame">⚔️ Fama</th><th data-sort="pct">📊 Participación</th><th data-sort="delta">📈 vs Ant.</th><th data-sort="verdict">✅ Veredicto</th><th data-sort="suggestion">💡 Sugerencia</th></tr></thead><tbody></tbody></table></div></div>
-
-        <div class="collapsible" data-target="comparativeCollapse"><span>🔄 Comparativa vs semana anterior</span><span class="chevron">▼</span></div>
-        <div id="comparativeCollapse" class="collapsible-content"><div class="table-wrapper"><table id="compTable"><thead><tr><th>👤 Jugador</th><th>⚔️ Fama actual</th><th>📜 Fama anterior</th><th>📊 Variación</th><th>📈 Estado</th></tr></thead><tbody></tbody></table></div></div>
-
-        <div class="collapsible" data-target="inactivityCollapse"><span>⏰ Inactividad prolongada (>7 días)</span><span class="chevron">▼</span></div>
-        <div id="inactivityCollapse" class="collapsible-content"><div class="table-wrapper"><table id="inactiveTable"><thead><tr><th>👤 Jugador</th><th>🕐 Última conexión</th><th>📅 Días</th><th>⚠️ Acción</th></tr></thead><tbody></tbody></table></div></div>
+  <div class="collapsible" data-target="compCollapse">
+    <span>🔄 Comparativa vs semana anterior</span><span class="chevron">▼</span>
+  </div>
+  <div id="compCollapse" class="collapsible-content">
+    <div class="tbl-wrap">
+      <table><thead><tr>
+        <th>👤 Jugador</th><th>⚔️ Fama actual</th><th>📜 Fama anterior</th><th>🃏 Mazos</th><th>📊 Variación</th><th>📈 Estado</th>
+      </tr></thead><tbody id="compTbody"></tbody></table>
     </div>
+  </div>
 
-    <!-- Pestaña Histórica -->
-    <div id="historicalTab" class="tab-pane">
-        <div class="search-bar"><input type="text" id="historicalSearch" placeholder="🔍 Buscar jugador..."></div>
-        <div class="table-wrapper"><table class="heatmap-table" id="heatmapTable"><thead id="heatmapHead"></thead><tbody id="heatmapBody"></tbody></table></div>
+  <div class="collapsible" data-target="inactiveCollapse">
+    <span>⏰ Inactividad prolongada (&gt;7 días)</span><span class="chevron">▼</span>
+  </div>
+  <div id="inactiveCollapse" class="collapsible-content">
+    <div class="tbl-wrap">
+      <table><thead><tr>
+        <th>👤 Jugador</th><th>🕐 Última conexión</th><th>📅 Días inactivo</th><th>⚔️ Fama actual</th><th>⚠️ Acción</th>
+      </tr></thead><tbody id="inactiveTbody"></tbody></table>
     </div>
+  </div>
+</div>
 
-    <!-- Pestaña Analytics con NUEVAS GRÁFICAS -->
-    <div id="analyticsTab" class="tab-pane">
-        <div class="charts-grid">
-            <div class="chart-card">
-                <h4>🥇 EFICIENCIA (Fama por mazo)</h4>
-                <canvas id="efficiencyChart"></canvas>
-                <p style="font-size:0.7rem; margin-top:0.5rem; opacity:0.7;">📌 Jugadores con alta eficiencia = pocos mazos, mucha fama</p>
-            </div>
-            <div class="chart-card">
-                <h4>🥧 PARTICIPACIÓN DEL CLAN</h4>
-                <canvas id="participationChart"></canvas>
-                <p style="font-size:0.7rem; margin-top:0.5rem; opacity:0.7;">📌 16/16 = compromiso total | 0 mazos = inactivos</p>
-            </div>
-            <div class="chart-card">
-                <h4>📊 CONSISTENCIA: Top 5 vs Bottom 5</h4>
-                <canvas id="consistencyChart"></canvas>
-                <p style="font-size:0.7rem; margin-top:0.5rem; opacity:0.7;">📌 Consistente = siempre ≥2300 | Inconsistente = varía mucho</p>
-            </div>
-        </div>
-        <div style="background: linear-gradient(135deg, rgba(12,17,26,0.8), rgba(8,12,20,0.8)); border-radius:20px; padding:1rem; margin-top:1rem;">
-            <h4 style="font-family:'Rajdhani'; margin-bottom:0.8rem;">🔥 TOP 10 EFICIENCIA (Fama por mazo)</h4>
-            <div id="efficiencyList" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(200px,1fr)); gap:8px;"></div>
-        </div>
+<!-- ═══════ HISTÓRICA ═══════ -->
+<div id="historicalTab" class="tab-pane">
+  <div class="toolbar"><input type="text" id="historicalSearch" placeholder="🔍 Buscar jugador...">
+    <select id="hmSortSel">
+      <option value="total">Ordenar: Fama total</option>
+      <option value="avg">Ordenar: Promedio</option>
+      <option value="consistency">Ordenar: Consistencia</option>
+      <option value="name">Ordenar: Nombre A-Z</option>
+    </select>
+  </div>
+  <div class="tbl-wrap">
+    <table><thead id="hmHead"></thead><tbody id="hmBody"></tbody></table>
+  </div>
+</div>
+
+<!-- ═══════ RANKING ═══════ -->
+<div id="rankingTab" class="tab-pane">
+  <div class="toolbar">
+    <select id="rankCriteria">
+      <option value="total_fame">🏆 Fama Total</option>
+      <option value="avg_fame">📊 Promedio por semana</option>
+      <option value="consistency">✅ Consistencia (sem. ≥2300)</option>
+      <option value="streak">🔥 Racha activa</option>
+      <option value="eficiency">⚡ Eficiencia promedio</option>
+      <option value="participation">📆 Participación total</option>
+    </select>
+  </div>
+  <div class="ranking-grid" id="rankingGrid"></div>
+</div>
+
+<!-- ═══════ ANALYTICS ═══════ -->
+<div id="analyticsTab" class="tab-pane">
+  <div class="charts-grid">
+    <div class="chart-card">
+      <h4>🥇 Eficiencia — Fama por mazo (semana actual)</h4>
+      <div style="position:relative;height:260px"><canvas id="effChart"></canvas></div>
+      <p style="font-size:.67rem;color:var(--muted);margin-top:.45rem">Top 12 jugadores con más fama por mazo usado</p>
     </div>
-    <footer>⚔️ Reglas: ≥2300 ascenso | ≤1800 o 0 puntos con historial → expulsión | 🛡️ Nuevos jugadores protegidos</footer>
+    <div class="chart-card">
+      <h4>🥧 Participación del clan</h4>
+      <div style="position:relative;height:210px"><canvas id="partChart"></canvas></div>
+      <div id="partLegend" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:.55rem;font-size:.7rem;color:var(--muted)"></div>
+    </div>
+    <div class="chart-card">
+      <h4>📊 Consistencia — Top 5 vs Bottom 5 (por semana)</h4>
+      <div style="position:relative;height:260px"><canvas id="consistChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <h4>📉 Veredictos — Semana actual</h4>
+      <div style="position:relative;height:210px"><canvas id="verdictChart"></canvas></div>
+      <div id="verdictLegend" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:.55rem;font-size:.7rem;color:var(--muted)"></div>
+    </div>
+    <div class="chart-card">
+      <h4>📈 Evolución fama total del clan (10 semanas)</h4>
+      <div style="position:relative;height:230px"><canvas id="trendChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <h4>🎯 Distribución de fama — Semana actual</h4>
+      <div style="position:relative;height:230px"><canvas id="distChart"></canvas></div>
+      <p style="font-size:.67rem;color:var(--muted);margin-top:.45rem">Distribución de jugadores por rango de fama</p>
+    </div>
+  </div>
+  <div class="chart-card" style="margin-bottom:1.3rem">
+    <h4>🔥 Top 10 Eficiencia (Fama por mazo) — Semana actual</h4>
+    <div class="eff-grid" id="effList"></div>
+  </div>
+</div>
+
+<!-- ═══════ ALERTAS ═══════ -->
+<div id="alertsTab" class="tab-pane">
+  <div id="alertsContent"></div>
+</div>
+
+<footer>⚔️ Reglas: ≥2300 asciende · ≤1800 o 0 pts con historial → expulsión · 🛡️ Nuevos protegidos &nbsp;|&nbsp; ⌨️ Ctrl+F buscar · Ctrl+H tema</footer>
 </div>
 
 <script>
-    // DATOS COMPLETOS (Semana 132-3)
-    const rosterData = [
-        {tag:"#RLLQR28V",name:"Andrescastillo3",role:"elder",trophies:14000,lastSeen:"20260525T212805Z"},
-        {tag:"#U88G889VL",name:"Nozel",role:"elder",trophies:13680,lastSeen:"20260525T210740Z"},
-        {tag:"#2J2YUVU8G",name:"☢Mr.Gremory☣",role:"member",trophies:13680,lastSeen:"20260525T060703Z"},
-        {tag:"#PGUU2G88V",name:"Jeison雨",role:"elder",trophies:13506,lastSeen:"20260525T175351Z"},
-        {tag:"#ULYCP99CP",name:"Apolo_07",role:"elder",trophies:13367,lastSeen:"20260525T205054Z"},
-        {tag:"#8PUPGLGCL",name:"max",role:"member",trophies:13359,lastSeen:"20260525T175218Z"},
-        {tag:"#89PP9PLP",name:"yeye",role:"leader",trophies:13084,lastSeen:"20260525T224914Z"},
-        {tag:"#UYRUJCU2Q",name:"Tomasv_08",role:"elder",trophies:13060,lastSeen:"20260525T021159Z"},
-        {tag:"#VGQL8VUGC",name:"Guerrero",role:"elder",trophies:13030,lastSeen:"20260525T225549Z"},
-        {tag:"#P0CRRG2GJ",name:"diomiso",role:"member",trophies:13015,lastSeen:"20260525T193249Z"},
-        {tag:"#299LPVJLQ",name:"conquistador",role:"elder",trophies:12760,lastSeen:"20260525T175117Z"},
-        {tag:"#82PQPGPLG",name:"ALEJO2005",role:"member",trophies:12753,lastSeen:"20260525T131803Z"},
-        {tag:"#U0PYGJ8RQ",name:"El nea",role:"elder",trophies:12711,lastSeen:"20260525T183753Z"},
-        {tag:"#QPCJLLLQP",name:"°LUIS™π",role:"member",trophies:12704,lastSeen:"20260525T044121Z"},
-        {tag:"#V92YQ9U",name:"Icefer",role:"elder",trophies:12677,lastSeen:"20260525T232836Z"},
-        {tag:"#Y880LPJUY",name:"torvi.",role:"elder",trophies:12628,lastSeen:"20260525T130507Z"},
-        {tag:"#CG2R2YU9C",name:"sergio",role:"member",trophies:12625,lastSeen:"20260525T225331Z"},
-        {tag:"#98YQ88RPY",name:"CARTI ϟ JUANDA",role:"elder",trophies:12620,lastSeen:"20260525T221117Z"},
-        {tag:"#JQGC8YP8U",name:"yeison ramirez",role:"elder",trophies:12620,lastSeen:"20260525T190215Z"},
-        {tag:"#YC82PYUPU",name:"♣️▪️Daniel▪️♣️",role:"coLeader",trophies:12480,lastSeen:"20260525T013258Z"},
-        {tag:"#20G8RVPGR",name:"JGamerGt",role:"member",trophies:12374,lastSeen:"20260525T213647Z"},
-        {tag:"#JQLGY0PCU",name:"soy-pajero",role:"member",trophies:12253,lastSeen:"20260525T143526Z"},
-        {tag:"#28U092U82",name:"michael_pogru",role:"member",trophies:12187,lastSeen:"20260525T162049Z"},
-        {tag:"#UPY9R999G",name:"system",role:"member",trophies:12184,lastSeen:"20260525T103948Z"},
-        {tag:"#U8P892UPQ",name:"AndresNav",role:"member",trophies:12180,lastSeen:"20260524T192619Z"},
-        {tag:"#980QLQVU8",name:"DESCUENTO",role:"member",trophies:12091,lastSeen:"20260525T165535Z"},
-        {tag:"#U9GRQV8QP",name:"i'm Jesús",role:"member",trophies:12060,lastSeen:"20260525T222234Z"},
-        {tag:"#20LV0GYGVG",name:"deiby",role:"member",trophies:12039,lastSeen:"20260525T212822Z"},
-        {tag:"#9YY0RVC08",name:"• m l y •",role:"elder",trophies:11758,lastSeen:"20260523T073932Z"},
-        {tag:"#Q9C8YCGUP",name:"perdom07",role:"member",trophies:11753,lastSeen:"20260525T200609Z"},
-        {tag:"#VY8PGJV09",name:"NITRO",role:"member",trophies:11724,lastSeen:"20260524T043936Z"},
-        {tag:"#J8CGPQJLG",name:"Taijory",role:"member",trophies:11706,lastSeen:"20260525T022442Z"},
-        {tag:"#RCL2U0RC2",name:"ricardo Tinjaca",role:"elder",trophies:11661,lastSeen:"20260525T193531Z"},
-        {tag:"#UUP0QRCUV",name:"sarmi",role:"member",trophies:11623,lastSeen:"20260525T225526Z"},
-        {tag:"#PJ2UYLGUG",name:"JM",role:"elder",trophies:11538,lastSeen:"20260525T230342Z"},
-        {tag:"#8PU92RUVY",name:"ちPL工れ匕モR",role:"member",trophies:11500,lastSeen:"20260525T233350Z"},
-        {tag:"#2Y82GRG29",name:"Carlos117",role:"elder",trophies:11283,lastSeen:"20260525T204028Z"},
-        {tag:"#99LUCVGR2",name:"jomabupa",role:"elder",trophies:11239,lastSeen:"20260525T233418Z"},
-        {tag:"#8PV2UYPRJ",name:"ADRIAN",role:"elder",trophies:11163,lastSeen:"20260525T233200Z"},
-        {tag:"#V2QGYJJVV",name:"jender",role:"member",trophies:11141,lastSeen:"20260525T231917Z"},
-        {tag:"#UV9GVJY09",name:"Miguel ordo",role:"member",trophies:11070,lastSeen:"20260525T031744Z"},
-        {tag:"#92JYPG0VQ",name:"⚡Thunder⚡",role:"elder",trophies:11066,lastSeen:"20260525T211319Z"},
-        {tag:"#208U9R8ULP",name:"migue",role:"elder",trophies:11027,lastSeen:"20260525T220141Z"},
-        {tag:"#UJ0QJCUPU",name:"marsans",role:"member",trophies:10203,lastSeen:"20260525T132033Z"},
-        {tag:"#20U2CLRC0L",name:"Dumar",role:"elder",trophies:10112,lastSeen:"20260525T232640Z"},
-        {tag:"#URYYYQRUU",name:"GËRØ_ROYALE",role:"member",trophies:10009,lastSeen:"20260525T193213Z"},
-        {tag:"#8LU0LGUQ",name:"PAULA",role:"elder",trophies:9603,lastSeen:"20260525T200714Z"},
-        {tag:"#UQP0GRYVP",name:"brans",role:"elder",trophies:9506,lastSeen:"20260525T202455Z"},
-        {tag:"#8QR9YUC2",name:"Rey rasputio",role:"coLeader",trophies:9000,lastSeen:"20260525T025138Z"},
-        {tag:"#VC0VQC9C2",name:"ale",role:"member",trophies:5529,lastSeen:"20260524T220858Z"}
-    ];
+const RAW = {"players": [{"tag": "#V92YQ9U", "name": "Icefer", "role": "elder", "trophies": 12677, "lastSeen": "20260525T232836.000Z", "expLevel": 65, "donations": 215, "total_fame": 29250, "total_decks": 160, "participation": 1.0, "weeks": {"132-3": {"fame": 2900, "decks": 16}, "132-2": {"fame": 3300, "decks": 16}, "132-1": {"fame": 2800, "decks": 16}, "131-4": {"fame": 3300, "decks": 16}, "131-3": {"fame": 2500, "decks": 16}, "131-2": {"fame": 2850, "decks": 16}, "131-1": {"fame": 3000, "decks": 16}, "130-5": {"fame": 3000, "decks": 16}, "130-4": {"fame": 2500, "decks": 16}, "130-3": {"fame": 3100, "decks": 16}}}, {"tag": "#208U9R8ULP", "name": "migue", "role": "elder", "trophies": 11027, "lastSeen": "20260525T220141.000Z", "expLevel": 65, "donations": 20, "total_fame": 28500, "total_decks": 160, "participation": 1.0, "weeks": {"132-3": {"fame": 2550, "decks": 16}, "132-2": {"fame": 2700, "decks": 16}, "132-1": {"fame": 3200, "decks": 16}, "131-4": {"fame": 2700, "decks": 16}, "131-3": {"fame": 3150, "decks": 16}, "131-2": {"fame": 2550, "decks": 16}, "131-1": {"fame": 3300, "decks": 16}, "130-5": {"fame": 2650, "decks": 16}, "130-4": {"fame": 3050, "decks": 16}, "130-3": {"fame": 2650, "decks": 16}}}, {"tag": "#89PP9PLP", "name": "yeye", "role": "leader", "trophies": 13084, "lastSeen": "20260525T224914.000Z", "expLevel": 78, "donations": 162, "total_fame": 28450, "total_decks": 160, "participation": 1.0, "weeks": {"132-3": {"fame": 2850, "decks": 16}, "132-2": {"fame": 2600, "decks": 16}, "132-1": {"fame": 2750, "decks": 16}, "131-4": {"fame": 3100, "decks": 16}, "131-3": {"fame": 2450, "decks": 16}, "131-2": {"fame": 2850, "decks": 16}, "131-1": {"fame": 3000, "decks": 16}, "130-5": {"fame": 2850, "decks": 16}, "130-4": {"fame": 2950, "decks": 16}, "130-3": {"fame": 3050, "decks": 16}}}, {"tag": "#U88G889VL", "name": "Nozel", "role": "elder", "trophies": 13680, "lastSeen": "20260525T210740.000Z", "expLevel": 78, "donations": 83, "total_fame": 27400, "total_decks": 156, "participation": 1.0, "weeks": {"132-3": {"fame": 2300, "decks": 16}, "132-2": {"fame": 3200, "decks": 16}, "132-1": {"fame": 3000, "decks": 16}, "131-4": {"fame": 2550, "decks": 16}, "131-3": {"fame": 2650, "decks": 16}, "131-2": {"fame": 2650, "decks": 16}, "131-1": {"fame": 2500, "decks": 16}, "130-5": {"fame": 2400, "decks": 12}, "130-4": {"fame": 3150, "decks": 16}, "130-3": {"fame": 3000, "decks": 16}}}, {"tag": "#299LPVJLQ", "name": "conquistador", "role": "elder", "trophies": 12760, "lastSeen": "20260525T175117.000Z", "expLevel": 69, "donations": 0, "total_fame": 27350, "total_decks": 155, "participation": 1.0, "weeks": {"132-3": {"fame": 2800, "decks": 16}, "132-2": {"fame": 3050, "decks": 16}, "132-1": {"fame": 2900, "decks": 16}, "131-4": {"fame": 1800, "decks": 12}, "131-3": {"fame": 2950, "decks": 16}, "131-2": {"fame": 2600, "decks": 16}, "131-1": {"fame": 2500, "decks": 15}, "130-5": {"fame": 3000, "decks": 16}, "130-4": {"fame": 2800, "decks": 16}, "130-3": {"fame": 2950, "decks": 16}}}, {"tag": "#Y880LPJUY", "name": "torvi.", "role": "elder", "trophies": 12628, "lastSeen": "20260525T130507.000Z", "expLevel": 77, "donations": 124, "total_fame": 26750, "total_decks": 159, "participation": 1.0, "weeks": {"132-3": {"fame": 2750, "decks": 16}, "132-2": {"fame": 2750, "decks": 15}, "132-1": {"fame": 2900, "decks": 16}, "131-4": {"fame": 2550, "decks": 16}, "131-3": {"fame": 2650, "decks": 16}, "131-2": {"fame": 2700, "decks": 16}, "131-1": {"fame": 2750, "decks": 16}, "130-5": {"fame": 2550, "decks": 16}, "130-4": {"fame": 2550, "decks": 16}, "130-3": {"fame": 2600, "decks": 16}}}, {"tag": "#20U2CLRC0L", "name": "Dumar", "role": "elder", "trophies": 10112, "lastSeen": "20260525T232640.000Z", "expLevel": 46, "donations": 0, "total_fame": 25700, "total_decks": 154, "participation": 1.0, "weeks": {"132-3": {"fame": 2800, "decks": 16}, "132-2": {"fame": 2850, "decks": 16}, "132-1": {"fame": 2550, "decks": 16}, "131-4": {"fame": 2250, "decks": 12}, "131-3": {"fame": 2500, "decks": 16}, "131-2": {"fame": 2500, "decks": 16}, "131-1": {"fame": 3000, "decks": 16}, "130-5": {"fame": 2400, "decks": 14}, "130-4": {"fame": 2350, "decks": 16}, "130-3": {"fame": 2500, "decks": 16}}}, {"tag": "#URYYYQRUU", "name": "GËRØ_ROYALE", "role": "member", "trophies": 10009, "lastSeen": "20260525T193213.000Z", "expLevel": 57, "donations": 96, "total_fame": 25000, "total_decks": 148, "participation": 1.0, "weeks": {"132-3": {"fame": 400, "decks": 4}, "132-2": {"fame": 2950, "decks": 16}, "132-1": {"fame": 2950, "decks": 16}, "131-4": {"fame": 2700, "decks": 16}, "131-3": {"fame": 2650, "decks": 16}, "131-2": {"fame": 2600, "decks": 16}, "131-1": {"fame": 2850, "decks": 16}, "130-5": {"fame": 2100, "decks": 16}, "130-4": {"fame": 3000, "decks": 16}, "130-3": {"fame": 2800, "decks": 16}}}, {"tag": "#JQGC8YP8U", "name": "yeison ramirez", "role": "elder", "trophies": 12620, "lastSeen": "20260525T190215.000Z", "expLevel": 72, "donations": 34, "total_fame": 24350, "total_decks": 158, "participation": 1.0, "weeks": {"132-3": {"fame": 2850, "decks": 16}, "132-2": {"fame": 2500, "decks": 16}, "132-1": {"fame": 2800, "decks": 16}, "131-4": {"fame": 2350, "decks": 14}, "131-3": {"fame": 2400, "decks": 16}, "131-2": {"fame": 2350, "decks": 16}, "131-1": {"fame": 2600, "decks": 16}, "130-5": {"fame": 2000, "decks": 16}, "130-4": {"fame": 2100, "decks": 16}, "130-3": {"fame": 2400, "decks": 16}}}, {"tag": "#2Y82GRG29", "name": "Carlos117", "role": "elder", "trophies": 11283, "lastSeen": "20260525T204028.000Z", "expLevel": 60, "donations": 7, "total_fame": 24300, "total_decks": 159, "participation": 1.0, "weeks": {"132-3": {"fame": 2400, "decks": 16}, "132-2": {"fame": 2400, "decks": 16}, "132-1": {"fame": 2400, "decks": 16}, "131-4": {"fame": 2300, "decks": 16}, "131-3": {"fame": 2300, "decks": 16}, "131-2": {"fame": 2900, "decks": 16}, "131-1": {"fame": 2500, "decks": 16}, "130-5": {"fame": 2300, "decks": 16}, "130-4": {"fame": 2200, "decks": 15}, "130-3": {"fame": 2600, "decks": 16}}}, {"tag": "#U0PYGJ8RQ", "name": "El nea", "role": "elder", "trophies": 12711, "lastSeen": "20260525T183753.000Z", "expLevel": 63, "donations": 24, "total_fame": 24100, "total_decks": 153, "participation": 1.0, "weeks": {"132-3": {"fame": 2600, "decks": 16}, "132-2": {"fame": 2200, "decks": 14}, "132-1": {"fame": 1600, "decks": 12}, "131-4": {"fame": 2800, "decks": 16}, "131-3": {"fame": 2400, "decks": 16}, "131-2": {"fame": 2300, "decks": 15}, "131-1": {"fame": 2500, "decks": 16}, "130-5": {"fame": 2400, "decks": 16}, "130-4": {"fame": 2700, "decks": 16}, "130-3": {"fame": 2600, "decks": 16}}}, {"tag": "#YC82PYUPU", "name": "♣️▪️Daniel▪️♣️", "role": "coLeader", "trophies": 12480, "lastSeen": "20260525T013258.000Z", "expLevel": 65, "donations": 26, "total_fame": 24050, "total_decks": 152, "participation": 1.0, "weeks": {"132-3": {"fame": 2400, "decks": 16}, "132-2": {"fame": 2500, "decks": 16}, "132-1": {"fame": 2300, "decks": 16}, "131-4": {"fame": 2300, "decks": 16}, "131-3": {"fame": 1900, "decks": 12}, "131-2": {"fame": 2400, "decks": 16}, "131-1": {"fame": 2000, "decks": 12}, "130-5": {"fame": 2700, "decks": 16}, "130-4": {"fame": 2850, "decks": 16}, "130-3": {"fame": 2700, "decks": 16}}}, {"tag": "#8LU0LGUQ", "name": "PAULA", "role": "elder", "trophies": 9603, "lastSeen": "20260525T200714.000Z", "expLevel": 59, "donations": 0, "total_fame": 22900, "total_decks": 152, "participation": 1.0, "weeks": {"132-3": {"fame": 2400, "decks": 16}, "132-2": {"fame": 2200, "decks": 16}, "132-1": {"fame": 1700, "decks": 12}, "131-4": {"fame": 2500, "decks": 16}, "131-3": {"fame": 2600, "decks": 16}, "131-2": {"fame": 2200, "decks": 16}, "131-1": {"fame": 1800, "decks": 12}, "130-5": {"fame": 2700, "decks": 16}, "130-4": {"fame": 2500, "decks": 16}, "130-3": {"fame": 2300, "decks": 16}}}, {"tag": "#PGUU2G88V", "name": "Jeison雨", "role": "elder", "trophies": 13506, "lastSeen": "20260525T175351.000Z", "expLevel": 75, "donations": 0, "total_fame": 22750, "total_decks": 147, "participation": 1.0, "weeks": {"132-3": {"fame": 1700, "decks": 12}, "132-2": {"fame": 2500, "decks": 16}, "132-1": {"fame": 1900, "decks": 12}, "131-4": {"fame": 2950, "decks": 16}, "131-3": {"fame": 2100, "decks": 16}, "131-2": {"fame": 2400, "decks": 16}, "131-1": {"fame": 2200, "decks": 15}, "130-5": {"fame": 2550, "decks": 16}, "130-4": {"fame": 1850, "decks": 12}, "130-3": {"fame": 2600, "decks": 16}}}, {"tag": "#J8CGPQJLG", "name": "Taijory", "role": "member", "trophies": 11706, "lastSeen": "20260525T022442.000Z", "expLevel": 63, "donations": 20, "total_fame": 22700, "total_decks": 148, "participation": 1.0, "weeks": {"132-3": {"fame": 2800, "decks": 16}, "132-2": {"fame": 2300, "decks": 16}, "132-1": {"fame": 1800, "decks": 12}, "131-4": {"fame": 1700, "decks": 12}, "131-3": {"fame": 2200, "decks": 16}, "131-2": {"fame": 2800, "decks": 16}, "131-1": {"fame": 2200, "decks": 16}, "130-5": {"fame": 1900, "decks": 12}, "130-4": {"fame": 2500, "decks": 16}, "130-3": {"fame": 2500, "decks": 16}}}, {"tag": "#8PV2UYPRJ", "name": "ADRIAN", "role": "elder", "trophies": 11163, "lastSeen": "20260525T233200.000Z", "expLevel": 72, "donations": 46, "total_fame": 21800, "total_decks": 139, "participation": 1.0, "weeks": {"132-3": {"fame": 1200, "decks": 8}, "132-2": {"fame": 2150, "decks": 15}, "132-1": {"fame": 1850, "decks": 12}, "131-4": {"fame": 2750, "decks": 16}, "131-3": {"fame": 2700, "decks": 16}, "131-2": {"fame": 1600, "decks": 12}, "131-1": {"fame": 2100, "decks": 16}, "130-5": {"fame": 2650, "decks": 16}, "130-4": {"fame": 2700, "decks": 16}, "130-3": {"fame": 2100, "decks": 12}}}, {"tag": "#98YQ88RPY", "name": "CARTI ϟ JUANDA", "role": "elder", "trophies": 12620, "lastSeen": "20260525T221117.000Z", "expLevel": 67, "donations": 86, "total_fame": 21700, "total_decks": 137, "participation": 1.0, "weeks": {"132-3": {"fame": 2800, "decks": 16}, "132-2": {"fame": 2600, "decks": 16}, "132-1": {"fame": 2700, "decks": 16}, "131-4": {"fame": 1950, "decks": 12}, "131-3": {"fame": 1000, "decks": 8}, "131-2": {"fame": 3000, "decks": 16}, "131-1": {"fame": 2200, "decks": 15}, "130-5": {"fame": 1800, "decks": 12}, "130-4": {"fame": 2050, "decks": 15}, "130-3": {"fame": 1600, "decks": 11}}}, {"tag": "#PJ2UYLGUG", "name": "JM", "role": "elder", "trophies": 11538, "lastSeen": "20260525T230342.000Z", "expLevel": 67, "donations": 24, "total_fame": 20950, "total_decks": 138, "participation": 1.0, "weeks": {"132-3": {"fame": 1300, "decks": 10}, "132-2": {"fame": 2300, "decks": 16}, "132-1": {"fame": 2500, "decks": 15}, "131-4": {"fame": 2400, "decks": 15}, "131-3": {"fame": 1600, "decks": 11}, "131-2": {"fame": 2500, "decks": 16}, "131-1": {"fame": 2000, "decks": 14}, "130-5": {"fame": 2800, "decks": 16}, "130-4": {"fame": 1800, "decks": 13}, "130-3": {"fame": 1750, "decks": 12}}}, {"tag": "#U9GRQV8QP", "name": "i'm Jesús", "role": "member", "trophies": 12060, "lastSeen": "20260525T222234.000Z", "expLevel": 77, "donations": 66, "total_fame": 19500, "total_decks": 128, "participation": 1.0, "weeks": {"132-3": {"fame": 2650, "decks": 16}, "132-2": {"fame": 2400, "decks": 16}, "132-1": {"fame": 2400, "decks": 16}, "131-4": {"fame": 2200, "decks": 16}, "131-3": {"fame": 2700, "decks": 16}, "131-2": {"fame": 2200, "decks": 16}, "131-1": {"fame": 2350, "decks": 16}, "130-5": {"fame": 2600, "decks": 16}, "130-4": {"fame": 0, "decks": 0}, "130-3": {"fame": 0, "decks": 0}}}, {"tag": "#9YY0RVC08", "name": "• m l y •", "role": "elder", "trophies": 11758, "lastSeen": "20260523T073932.000Z", "expLevel": 69, "donations": 0, "total_fame": 18900, "total_decks": 120, "participation": 1.0, "weeks": {"132-3": {"fame": 1425, "decks": 8}, "132-2": {"fame": 925, "decks": 6}, "132-1": {"fame": 1725, "decks": 12}, "131-4": {"fame": 1950, "decks": 14}, "131-3": {"fame": 2800, "decks": 16}, "131-2": {"fame": 2350, "decks": 16}, "131-1": {"fame": 2600, "decks": 16}, "130-5": {"fame": 2550, "decks": 16}, "130-4": {"fame": 2575, "decks": 16}, "130-3": {"fame": 0, "decks": 0}}}, {"tag": "#99LUCVGR2", "name": "jomabupa", "role": "elder", "trophies": 11239, "lastSeen": "20260525T233418.000Z", "expLevel": 81, "donations": 132, "total_fame": 18500, "total_decks": 124, "participation": 1.0, "weeks": {"132-3": {"fame": 2000, "decks": 12}, "132-2": {"fame": 2200, "decks": 16}, "132-1": {"fame": 2400, "decks": 16}, "131-4": {"fame": 2400, "decks": 16}, "131-3": {"fame": 2200, "decks": 16}, "131-2": {"fame": 2400, "decks": 16}, "131-1": {"fame": 2600, "decks": 16}, "130-5": {"fame": 2300, "decks": 16}, "130-4": {"fame": 0, "decks": 0}, "130-3": {"fame": 0, "decks": 0}}}, {"tag": "#VGQL8VUGC", "name": "Guerrero", "role": "elder", "trophies": 13030, "lastSeen": "20260525T225549.000Z", "expLevel": 72, "donations": 78, "total_fame": 17475, "total_decks": 96, "participation": 1.0, "weeks": {"132-3": {"fame": 2900, "decks": 16}, "132-2": {"fame": 2800, "decks": 16}, "132-1": {"fame": 2800, "decks": 16}, "131-4": {"fame": 2900, "decks": 16}, "131-3": {"fame": 3050, "decks": 16}, "131-2": {"fame": 3025, "decks": 16}, "131-1": {"fame": 0, "decks": 0}, "130-5": {"fame": 0, "decks": 0}, "130-4": {"fame": 0, "decks": 0}, "130-3": {"fame": 0, "decks": 0}}}, {"tag": "#RLLQR28V", "name": "Andrescastillo3", "role": "elder", "trophies": 14000, "lastSeen": "20260525T212805.000Z", "expLevel": 81, "donations": 194, "total_fame": 16550, "total_decks": 89, "participation": 1.0, "weeks": {"132-3": {"fame": 2700, "decks": 16}, "132-2": {"fame": 3300, "decks": 16}, "132-1": {"fame": 3000, "decks": 16}, "131-4": {"fame": 2200, "decks": 12}, "131-3": {"fame": 2900, "decks": 14}, "131-2": {"fame": 2450, "decks": 15}, "131-1": {"fame": 0, "decks": 0}, "130-5": {"fame": 0, "decks": 0}, "130-4": {"fame": 0, "decks": 0}, "130-3": {"fame": 0, "decks": 0}}}, {"tag": "#ULYCP99CP", "name": "Apolo_07", "role": "elder", "trophies": 13367, "lastSeen": "20260525T205054.000Z", "expLevel": 70, "donations": 8, "total_fame": 16100, "total_decks": 87, "participation": 1.0, "weeks": {"132-3": {"fame": 3300, "decks": 16}, "132-2": {"fame": 3100, "decks": 16}, "132-1": {"fame": 1750, "decks": 11}, "131-4": {"fame": 3000, "decks": 16}, "131-3": {"fame": 2250, "decks": 12}, "131-2": {"fame": 2700, "decks": 16}, "131-1": {"fame": 0, "decks": 0}, "130-5": {"fame": 0, "decks": 0}, "130-4": {"fame": 0, "decks": 0}, "130-3": {"fame": 0, "decks": 0}}}, {"tag": "#92JYPG0VQ", "name": "⚡Thunder⚡", "role": "elder", "trophies": 11066, "lastSeen": "20260525T211319.000Z", "expLevel": 62, "donations": 50, "total_fame": 13700, "total_decks": 80, "participation": 1.0, "weeks": {"132-3": {"fame": 2650, "decks": 16}, "132-2": {"fame": 2800, "decks": 16}, "132-1": {"fame": 3000, "decks": 16}, "131-4": {"fame": 2600, "decks": 16}, "131-3": {"fame": 2650, "decks": 16}, "131-2": {"fame": 0, "decks": 0}, "131-1": {"fame": 0, "decks": 0}, "130-5": {"fame": 0, "decks": 0}, "130-4": {"fame": 0, "decks": 0}, "130-3": {"fame": 0, "decks": 0}}}, {"tag": "#UYRUJCU2Q", "name": "Tomasv_08", "role": "elder", "trophies": 13060, "lastSeen": "20260525T021159.000Z", "expLevel": 68, "donations": 0, "total_fame": 12250, "total_decks": 79, "participation": 1.0, "weeks": {"132-3": {"fame": 1900, "decks": 12}, "132-2": {"fame": 2300, "decks": 15}, "132-1": {"fame": 2100, "decks": 12}, "131-4": {"fame": 1850, "decks": 12}, "131-3": {"fame": 1600, "decks": 12}, "131-2": {"fame": 2500, "decks": 16}, "131-1": {"fame": 0, "decks": 0}, "130-5": {"fame": 0, "decks": 0}, "130-4": {"fame": 0, "decks": 0}, "130-3": {"fame": 0, "decks": 0}}}, {"tag": "#8QR9YUC2", "name": "Rey rasputio", "role": "coLeader", "trophies": 9000, "lastSeen": "20260525T025138.000Z", "expLevel": 58, "donations": 0, "total_fame": 10175, "total_decks": 84, "participation": 1.0, "weeks": {"132-3": {"fame": 900, "decks": 8}, "132-2": {"fame": 850, "decks": 8}, "132-1": {"fame": 975, "decks": 9}, "131-4": {"fame": 900, "decks": 7}, "131-3": {"fame": 275, "decks": 3}, "131-2": {"fame": 1200, "decks": 10}, "131-1": {"fame": 875, "decks": 7}, "130-5": {"fame": 550, "decks": 4}, "130-4": {"fame": 2275, "decks": 16}, "130-3": {"fame": 1375, "decks": 12}}}, {"tag": "#82PQPGPLG", "name": "ALEJO2005", "role": "member", "trophies": 12753, "lastSeen": "20260525T131803.000Z", "expLevel": 68, "donations": 58, "total_fame": 9950, "total_decks": 74, "participation": 1.0, "weeks": {"132-3": {"fame": 1100, "decks": 7}, "132-2": {"fame": 1600, "decks": 14}, "132-1": {"fame": 2100, "decks": 15}, "131-4": {"fame": 1450, "decks": 11}, "131-3": {"fame": 1900, "decks": 15}, "131-2": {"fame": 1800, "decks": 12}, "131-1": {"fame": 0, "decks": 0}, "130-5": {"fame": 0, "decks": 0}, "130-4": {"fame": 0, "decks": 0}, "130-3": {"fame": 0, "decks": 0}}}, {"tag": "#U8P892UPQ", "name": "AndresNav", "role": "member", "trophies": 12180, "lastSeen": "20260524T192619.000Z", "expLevel": 77, "donations": 0, "total_fame": 8100, "total_decks": 61, "participation": 1.0, "weeks": {"132-3": {"fame": 2200, "decks": 16}, "132-2": {"fame": 2100, "decks": 16}, "132-1": {"fame": 1900, "decks": 16}, "131-4": {"fame": 1900, "decks": 13}, "131-3": {"fame": 0, "decks": 0}, "131-2": {"fame": 0, "decks": 0}, "131-1": {"fame": 0, "decks": 0}, "130-5": {"fame": 0, "decks": 0}, "130-4": {"fame": 0, "decks": 0}, "130-3": {"fame": 0, "decks": 0}}}, {"tag": "#980QLQVU8", "name": "DESCUENTO", "role": "member", "trophies": 12091, "lastSeen": "20260525T165535.000Z", "expLevel": 77, "donations": 0, "total_fame": 6800, "total_decks": 43, "participation": 1.0, "weeks": {"132-3": {"fame": 1900, "decks": 12}, "132-2": {"fame": 1900, "decks": 14}, "132-1": {"fame": 2100, "decks": 12}, "131-4": {"fame": 900, "decks": 5}, "131-3": {"fame": 0, "decks": 0}, "131-2": {"fame": 0, "decks": 0}, "131-1": {"fame": 0, "decks": 0}, "130-5": {"fame": 0, "decks": 0}, "130-4": {"fame": 0, "decks": 0}, "130-3": {"fame": 0, "decks": 0}}}, {"tag": "#20LV0GYGVG", "name": "deiby", "role": "member", "trophies": 12039, "lastSeen": "20260525T212822.000Z", "expLevel": 67, "donations": 0, "total_fame": 4900, "total_decks": 32, "participation": 1.0, "weeks": {"132-3": {"fame": 700, "decks": 4}, "132-2": {"fame": 2400, "decks": 16}, "132-1": {"fame": 1800, "decks": 12}, "131-4": {"fame": 0, "decks": 0}, "131-3": {"fame": 0, "decks": 0}, "131-2": {"fame": 0, "decks": 0}, "131-1": {"fame": 0, "decks": 0}, "130-5": {"fame": 0, "decks": 0}, "130-4": {"fame": 0, "decks": 0}, "130-3": {"fame": 0, "decks": 0}}}, {"tag": "#UUP0QRCUV", "name": "sarmi", "role": "member", "trophies": 11623, "lastSeen": "20260525T225526.000Z", "expLevel": 59, "donations": 10, "total_fame": 4350, "total_decks": 30, "participation": 1.0, "weeks": {"132-3": {"fame": 2500, "decks": 16}, "132-2": {"fame": 1025, "decks": 7}, "132-1": {"fame": 825, "decks": 7}, "131-4": {"fame": 0, "decks": 0}, "131-3": {"fame": 0, "decks": 0}, "131-2": {"fame": 0, "decks": 0}, "131-1": {"fame": 0, "decks": 0}, "130-5": {"fame": 0, "decks": 0}, "130-4": {"fame": 0, "decks": 0}, "130-3": {"fame": 0, "decks": 0}}}, {"tag": "#20G8RVPGR", "name": "JGamerGt", "role": "member", "trophies": 12374, "lastSeen": "20260525T213647.000Z", "expLevel": 61, "donations": 50, "total_fame": 3850, "total_decks": 28, "participation": 1.0, "weeks": {"132-3": {"fame": 600, "decks": 4}, "132-2": {"fame": 1300, "decks": 8}, "132-1": {"fame": 900, "decks": 8}, "131-4": {"fame": 1050, "decks": 8}, "131-3": {"fame": 0, "decks": 0}, "131-2": {"fame": 0, "decks": 0}, "131-1": {"fame": 0, "decks": 0}, "130-5": {"fame": 0, "decks": 0}, "130-4": {"fame": 0, "decks": 0}, "130-3": {"fame": 0, "decks": 0}}}, {"tag": "#2J2YUVU8G", "name": "☢Mr.Gremory☣", "role": "member", "trophies": 13680, "lastSeen": "20260525T060703.000Z", "expLevel": 68, "donations": 0, "total_fame": 3500, "total_decks": 22, "participation": 1.0, "weeks": {"132-3": {"fame": 2100, "decks": 14}, "132-2": {"fame": 1400, "decks": 8}, "132-1": {"fame": 0, "decks": 0}, "131-4": {"fame": 0, "decks": 0}, "131-3": {"fame": 0, "decks": 0}, "131-2": {"fame": 0, "decks": 0}, "131-1": {"fame": 0, "decks": 0}, "130-5": {"fame": 0, "decks": 0}, "130-4": {"fame": 0, "decks": 0}, "130-3": {"fame": 0, "decks": 0}}}, {"tag": "#8PUPGLGCL", "name": "max", "role": "member", "trophies": 13359, "lastSeen": "20260525T175218.000Z", "expLevel": 81, "donations": 59, "total_fame": 2500, "total_decks": 16, "participation": 1.0, "weeks": {"132-3": {"fame": 2500, "decks": 16}, "132-2": {"fame": 0, "decks": 0}, "132-1": {"fame": 0, "decks": 0}, "131-4": {"fame": 0, "decks": 0}, "131-3": {"fame": 0, "decks": 0}, "131-2": {"fame": 0, "decks": 0}, "131-1": {"fame": 0, "decks": 0}, "130-5": {"fame": 0, "decks": 0}, "130-4": {"fame": 0, "decks": 0}, "130-3": {"fame": 0, "decks": 0}}}, {"tag": "#JQLGY0PCU", "name": "soy-pajero", "role": "member", "trophies": 12253, "lastSeen": "20260525T143526.000Z", "expLevel": 63, "donations": 13, "total_fame": 2200, "total_decks": 16, "participation": 1.0, "weeks": {"132-3": {"fame": 2200, "decks": 16}, "132-2": {"fame": 0, "decks": 0}, "132-1": {"fame": 0, "decks": 0}, "131-4": {"fame": 0, "decks": 0}, "131-3": {"fame": 0, "decks": 0}, "131-2": {"fame": 0, "decks": 0}, "131-1": {"fame": 0, "decks": 0}, "130-5": {"fame": 0, "decks": 0}, "130-4": {"fame": 0, "decks": 0}, "130-3": {"fame": 0, "decks": 0}}}, {"tag": "#28U092U82", "name": "michael_pogru", "role": "member", "trophies": 12187, "lastSeen": "20260525T162049.000Z", "expLevel": 70, "donations": 35, "total_fame": 1600, "total_decks": 10, "participation": 1.0, "weeks": {"132-3": {"fame": 1600, "decks": 10}, "132-2": {"fame": 0, "decks": 0}, "132-1": {"fame": 0, "decks": 0}, "131-4": {"fame": 0, "decks": 0}, "131-3": {"fame": 0, "decks": 0}, "131-2": {"fame": 0, "decks": 0}, "131-1": {"fame": 0, "decks": 0}, "130-5": {"fame": 0, "decks": 0}, "130-4": {"fame": 0, "decks": 0}, "130-3": {"fame": 0, "decks": 0}}}, {"tag": "#8PU92RUVY", "name": "ちPL工れ匕モR", "role": "member", "trophies": 11500, "lastSeen": "20260525T233350.000Z", "expLevel": 56, "donations": 12, "total_fame": 1600, "total_decks": 14, "participation": 1.0, "weeks": {"132-3": {"fame": 1600, "decks": 14}, "132-2": {"fame": 0, "decks": 0}, "132-1": {"fame": 0, "decks": 0}, "131-4": {"fame": 0, "decks": 0}, "131-3": {"fame": 0, "decks": 0}, "131-2": {"fame": 0, "decks": 0}, "131-1": {"fame": 0, "decks": 0}, "130-5": {"fame": 0, "decks": 0}, "130-4": {"fame": 0, "decks": 0}, "130-3": {"fame": 0, "decks": 0}}}, {"tag": "#QPCJLLLQP", "name": "°LUIS™π", "role": "member", "trophies": 12704, "lastSeen": "20260525T044121.000Z", "expLevel": 65, "donations": 0, "total_fame": 400, "total_decks": 3, "participation": 1.0, "weeks": {"132-3": {"fame": 400, "decks": 3}, "132-2": {"fame": 0, "decks": 0}, "132-1": {"fame": 0, "decks": 0}, "131-4": {"fame": 0, "decks": 0}, "131-3": {"fame": 0, "decks": 0}, "131-2": {"fame": 0, "decks": 0}, "131-1": {"fame": 0, "decks": 0}, "130-5": {"fame": 0, "decks": 0}, "130-4": {"fame": 0, "decks": 0}, "130-3": {"fame": 0, "decks": 0}}}, {"tag": "#UJ0QJCUPU", "name": "marsans", "role": "member", "trophies": 10203, "lastSeen": "20260525T132033.000Z", "expLevel": 58, "donations": 0, "total_fame": 300, "total_decks": 2, "participation": 1.0, "weeks": {"132-3": {"fame": 300, "decks": 2}, "132-2": {"fame": 0, "decks": 0}, "132-1": {"fame": 0, "decks": 0}, "131-4": {"fame": 0, "decks": 0}, "131-3": {"fame": 0, "decks": 0}, "131-2": {"fame": 0, "decks": 0}, "131-1": {"fame": 0, "decks": 0}, "130-5": {"fame": 0, "decks": 0}, "130-4": {"fame": 0, "decks": 0}, "130-3": {"fame": 0, "decks": 0}}}, {"tag": "#UV9GVJY09", "name": "Miguel ordo", "role": "member", "trophies": 11070, "lastSeen": "20260525T031744.000Z", "expLevel": 60, "donations": 0, "total_fame": 225, "total_decks": 3, "participation": 1.0, "weeks": {"132-3": {"fame": 225, "decks": 3}, "132-2": {"fame": 0, "decks": 0}, "132-1": {"fame": 0, "decks": 0}, "131-4": {"fame": 0, "decks": 0}, "131-3": {"fame": 0, "decks": 0}, "131-2": {"fame": 0, "decks": 0}, "131-1": {"fame": 0, "decks": 0}, "130-5": {"fame": 0, "decks": 0}, "130-4": {"fame": 0, "decks": 0}, "130-3": {"fame": 0, "decks": 0}}}, {"tag": "#UQP0GRYVP", "name": "brans", "role": "elder", "trophies": 9506, "lastSeen": "20260525T202455.000Z", "expLevel": 67, "donations": 47, "total_fame": 20700, "total_decks": 139, "participation": 0.9, "weeks": {"132-3": {"fame": 2400, "decks": 16}, "132-2": {"fame": 2700, "decks": 16}, "132-1": {"fame": 2300, "decks": 16}, "131-4": {"fame": 2200, "decks": 15}, "131-3": {"fame": 2100, "decks": 16}, "131-2": {"fame": 0, "decks": 0}, "131-1": {"fame": 2500, "decks": 16}, "130-5": {"fame": 2500, "decks": 16}, "130-4": {"fame": 1600, "decks": 12}, "130-3": {"fame": 2400, "decks": 16}}}, {"tag": "#RCL2U0RC2", "name": "ricardo Tinjaca", "role": "elder", "trophies": 11661, "lastSeen": "20260525T193531.000Z", "expLevel": 77, "donations": 26, "total_fame": 20950, "total_decks": 126, "participation": 0.89, "weeks": {"132-3": {"fame": 2800, "decks": 16}, "132-2": {"fame": 2900, "decks": 16}, "132-1": {"fame": 2750, "decks": 16}, "131-4": {"fame": 2700, "decks": 16}, "131-3": {"fame": 1850, "decks": 15}, "131-2": {"fame": 2700, "decks": 16}, "131-1": {"fame": 2350, "decks": 15}, "130-5": {"fame": 2900, "decks": 16}, "130-4": {"fame": 0, "decks": 0}, "130-3": {"fame": 0, "decks": 0}}}, {"tag": "#UPY9R999G", "name": "system", "role": "member", "trophies": 12184, "lastSeen": "20260525T103948.000Z", "expLevel": 75, "donations": 0, "total_fame": 15800, "total_decks": 95, "participation": 0.75, "weeks": {"132-3": {"fame": 2800, "decks": 16}, "132-2": {"fame": 0, "decks": 0}, "132-1": {"fame": 0, "decks": 0}, "131-4": {"fame": 0, "decks": 0}, "131-3": {"fame": 0, "decks": 0}, "131-2": {"fame": 2250, "decks": 16}, "131-1": {"fame": 2800, "decks": 16}, "130-5": {"fame": 2900, "decks": 16}, "130-4": {"fame": 2900, "decks": 16}, "130-3": {"fame": 2150, "decks": 15}}}, {"tag": "#VC0VQC9C2", "name": "ale", "role": "member", "trophies": 5529, "lastSeen": "20260524T220858.000Z", "expLevel": 32, "donations": 0, "total_fame": 8900, "total_decks": 58, "participation": 0.6, "weeks": {"132-3": {"fame": 1550, "decks": 12}, "132-2": {"fame": 0, "decks": 0}, "132-1": {"fame": 500, "decks": 4}, "131-4": {"fame": 2500, "decks": 14}, "131-3": {"fame": 1500, "decks": 8}, "131-2": {"fame": 0, "decks": 0}, "131-1": {"fame": 1750, "decks": 12}, "130-5": {"fame": 1100, "decks": 8}, "130-4": {"fame": 0, "decks": 0}, "130-3": {"fame": 0, "decks": 0}}}, {"tag": "#V2QGYJJVV", "name": "jender", "role": "member", "trophies": 11141, "lastSeen": "20260525T231917.000Z", "expLevel": 59, "donations": 0, "total_fame": 0, "total_decks": 0, "participation": 0.0, "weeks": {"132-3": {"fame": 0, "decks": 0}, "132-2": {"fame": 0, "decks": 0}, "132-1": {"fame": 0, "decks": 0}, "131-4": {"fame": 0, "decks": 0}, "131-3": {"fame": 0, "decks": 0}, "131-2": {"fame": 0, "decks": 0}, "131-1": {"fame": 0, "decks": 0}, "130-5": {"fame": 0, "decks": 0}, "130-4": {"fame": 0, "decks": 0}, "130-3": {"fame": 0, "decks": 0}}}, {"tag": "#VY8PGJV09", "name": "NITRO", "role": "member", "trophies": 11724, "lastSeen": "20260524T043936.000Z", "expLevel": 62, "donations": 0, "total_fame": 0, "total_decks": 0, "participation": 0.0, "weeks": {"132-3": {"fame": 0, "decks": 0}, "132-2": {"fame": 0, "decks": 0}, "132-1": {"fame": 0, "decks": 0}, "131-4": {"fame": 0, "decks": 0}, "131-3": {"fame": 0, "decks": 0}, "131-2": {"fame": 0, "decks": 0}, "131-1": {"fame": 0, "decks": 0}, "130-5": {"fame": 0, "decks": 0}, "130-4": {"fame": 0, "decks": 0}, "130-3": {"fame": 0, "decks": 0}}}, {"tag": "#Q9C8YCGUP", "name": "perdom07", "role": "member", "trophies": 11753, "lastSeen": "20260525T200609.000Z", "expLevel": 62, "donations": 0, "total_fame": 0, "total_decks": 0, "participation": 0.0, "weeks": {"132-3": {"fame": 0, "decks": 0}, "132-2": {"fame": 0, "decks": 0}, "132-1": {"fame": 0, "decks": 0}, "131-4": {"fame": 0, "decks": 0}, "131-3": {"fame": 0, "decks": 0}, "131-2": {"fame": 0, "decks": 0}, "131-1": {"fame": 0, "decks": 0}, "130-5": {"fame": 0, "decks": 0}, "130-4": {"fame": 0, "decks": 0}, "130-3": {"fame": 0, "decks": 0}}}, {"tag": "#CG2R2YU9C", "name": "sergio", "role": "member", "trophies": 12625, "lastSeen": "20260525T225331.000Z", "expLevel": 64, "donations": 134, "total_fame": 0, "total_decks": 0, "participation": 0.0, "weeks": {"132-3": {"fame": 0, "decks": 0}, "132-2": {"fame": 0, "decks": 0}, "132-1": {"fame": 0, "decks": 0}, "131-4": {"fame": 0, "decks": 0}, "131-3": {"fame": 0, "decks": 0}, "131-2": {"fame": 0, "decks": 0}, "131-1": {"fame": 0, "decks": 0}, "130-5": {"fame": 0, "decks": 0}, "130-4": {"fame": 0, "decks": 0}, "130-3": {"fame": 0, "decks": 0}}}, {"tag": "#P0CRRG2GJ", "name": "diomiso", "role": "member", "trophies": 13015, "lastSeen": "20260525T193249.000Z", "expLevel": 60, "donations": 104, "total_fame": 0, "total_decks": 0, "participation": 0.0, "weeks": {"132-3": {"fame": 0, "decks": 0}, "132-2": {"fame": 0, "decks": 0}, "132-1": {"fame": 0, "decks": 0}, "131-4": {"fame": 0, "decks": 0}, "131-3": {"fame": 0, "decks": 0}, "131-2": {"fame": 0, "decks": 0}, "131-1": {"fame": 0, "decks": 0}, "130-5": {"fame": 0, "decks": 0}, "130-4": {"fame": 0, "decks": 0}, "130-3": {"fame": 0, "decks": 0}}}], "weeks": ["132-3", "132-2", "132-1", "131-4", "131-3", "131-2", "131-1", "130-5", "130-4", "130-3"]};
+const PLAYERS = RAW.players;
+const WEEKS = RAW.weeks;
+const CURRENT_WEEK = WEEKS[0];
+let currentWeek = CURRENT_WEEK;
+let sortCol = "fame", sortDir = -1;
+let charts = {};
 
-    const warData = {
-        "#RLLQR28V":{"132-3":2700,"132-2":3300,"132-1":3000},
-        "#U88G889VL":{"132-3":2300,"132-2":3200,"132-1":3000},
-        "#2J2YUVU8G":{"132-3":2100,"132-2":1400,"132-1":0},
-        "#PGUU2G88V":{"132-3":1700,"132-2":2500,"132-1":1900},
-        "#ULYCP99CP":{"132-3":3300,"132-2":3100,"132-1":1750},
-        "#8PUPGLGCL":{"132-3":2500,"132-2":0,"132-1":0},
-        "#89PP9PLP":{"132-3":2850,"132-2":2600,"132-1":2750},
-        "#UYRUJCU2Q":{"132-3":1900,"132-2":2300,"132-1":2100},
-        "#VGQL8VUGC":{"132-3":2900,"132-2":2800,"132-1":2800},
-        "#P0CRRG2GJ":{"132-3":0,"132-2":0,"132-1":0},
-        "#299LPVJLQ":{"132-3":2800,"132-2":3050,"132-1":2900},
-        "#82PQPGPLG":{"132-3":1100,"132-2":1600,"132-1":2100},
-        "#U0PYGJ8RQ":{"132-3":2600,"132-2":2200,"132-1":1600},
-        "#QPCJLLLQP":{"132-3":400,"132-2":0,"132-1":0},
-        "#V92YQ9U":{"132-3":2900,"132-2":3300,"132-1":2800},
-        "#Y880LPJUY":{"132-3":2750,"132-2":2750,"132-1":2900},
-        "#CG2R2YU9C":{"132-3":0,"132-2":0,"132-1":0},
-        "#98YQ88RPY":{"132-3":2800,"132-2":2600,"132-1":2700},
-        "#JQGC8YP8U":{"132-3":2850,"132-2":2500,"132-1":2800},
-        "#YC82PYUPU":{"132-3":2400,"132-2":2500,"132-1":2300},
-        "#20G8RVPGR":{"132-3":600,"132-2":1300,"132-1":900},
-        "#JQLGY0PCU":{"132-3":2200,"132-2":0,"132-1":0},
-        "#28U092U82":{"132-3":1600,"132-2":0,"132-1":0},
-        "#UPY9R999G":{"132-3":2800,"132-2":0,"132-1":0},
-        "#U8P892UPQ":{"132-3":2200,"132-2":2100,"132-1":1900},
-        "#980QLQVU8":{"132-3":1900,"132-2":1900,"132-1":2100},
-        "#U9GRQV8QP":{"132-3":2650,"132-2":2400,"132-1":2400},
-        "#20LV0GYGVG":{"132-3":700,"132-2":2400,"132-1":1800},
-        "#9YY0RVC08":{"132-3":1425,"132-2":925,"132-1":1725},
-        "#Q9C8YCGUP":{"132-3":0,"132-2":0,"132-1":0},
-        "#VY8PGJV09":{"132-3":0,"132-2":0,"132-1":0},
-        "#J8CGPQJLG":{"132-3":2800,"132-2":2300,"132-1":1800},
-        "#RCL2U0RC2":{"132-3":2800,"132-2":2900,"132-1":2750},
-        "#UUP0QRCUV":{"132-3":2500,"132-2":1025,"132-1":825},
-        "#PJ2UYLGUG":{"132-3":1300,"132-2":2300,"132-1":2500},
-        "#8PU92RUVY":{"132-3":1600,"132-2":0,"132-1":0},
-        "#2Y82GRG29":{"132-3":2400,"132-2":2400,"132-1":2400},
-        "#99LUCVGR2":{"132-3":2000,"132-2":2200,"132-1":2400},
-        "#8PV2UYPRJ":{"132-3":1200,"132-2":2150,"132-1":1850},
-        "#V2QGYJJVV":{"132-3":0,"132-2":0,"132-1":0},
-        "#UV9GVJY09":{"132-3":225,"132-2":0,"132-1":0},
-        "#92JYPG0VQ":{"132-3":2650,"132-2":2800,"132-1":3000},
-        "#208U9R8ULP":{"132-3":2550,"132-2":2700,"132-1":3200},
-        "#UJ0QJCUPU":{"132-3":300,"132-2":0,"132-1":0},
-        "#20U2CLRC0L":{"132-3":2800,"132-2":2850,"132-1":2550},
-        "#URYYYQRUU":{"132-3":400,"132-2":2950,"132-1":2950},
-        "#8LU0LGUQ":{"132-3":2400,"132-2":2200,"132-1":1700},
-        "#UQP0GRYVP":{"132-3":2400,"132-2":2700,"132-1":2300},
-        "#8QR9YUC2":{"132-3":900,"132-2":850,"132-1":975},
-        "#VC0VQC9C2":{"132-3":1550,"132-2":0,"132-1":500}
-    };
+// ── Helpers ──────────────────────────────────────────────────────
+function getVerdict(fame, decks, prevFame, weeksInClan) {
+  const isNew = weeksInClan <= 2;
+  if (fame >= 2300) return "ascend";
+  if (fame === 0 && !isNew) return "expel";
+  if (fame === 0 && isNew) return "observation";
+  if (fame <= 1800 && !isNew) return "expel";
+  if ((fame === 0 || fame <= 1800) && isNew) return "observation";
+  return "keep";
+}
+function weeksInClan(p) {
+  return WEEKS.filter(w => p.weeks[w].fame > 0 || p.weeks[w].decks > 0).length;
+}
+function streak(p) {
+  let s = 0;
+  for (const w of WEEKS) {
+    if (p.weeks[w].fame >= 2300) s++; else break;
+  }
+  return s;
+}
+function consistency(p) {
+  return WEEKS.filter(w => p.weeks[w].fame >= 2300).length;
+}
+function eficiency(fame, decks) { return decks > 0 ? Math.round(fame / decks) : 0; }
+function avgFame(p) {
+  const active = WEEKS.filter(w => p.weeks[w].fame > 0);
+  if (!active.length) return 0;
+  return Math.round(active.reduce((s,w) => s + p.weeks[w].fame, 0) / active.length);
+}
+function buildRow(p, weekId) {
+  const wIdx = WEEKS.indexOf(weekId);
+  const w = p.weeks[weekId] || {fame:0, decks:0};
+  const pw = wIdx+1 < WEEKS.length ? (p.weeks[WEEKS[wIdx+1]] || {fame:0,decks:0}) : {fame:0,decks:0};
+  const wic = weeksInClan(p);
+  return {
+    ...p,
+    fame: w.fame, decks: w.decks,
+    prevFame: pw.fame, delta: w.fame - pw.fame,
+    efic: eficiency(w.fame, w.decks),
+    verdict: getVerdict(w.fame, w.decks, pw.fame, wic),
+    streak: streak(p),
+    consistency: consistency(p),
+    wic
+  };
+}
+function buildWeekData(weekId) {
+  const rows = PLAYERS.map(p => buildRow(p, weekId));
+  const totalFame = rows.reduce((s,r) => s + r.fame, 0);
+  const active = rows.filter(r => r.fame > 0).length;
+  const ascend = rows.filter(r => r.verdict === "ascend").length;
+  const expel = rows.filter(r => r.verdict === "expel").length;
+  const obs = rows.filter(r => r.verdict === "observation").length;
+  const mvp = rows.reduce((a,b) => a.fame > b.fame ? a : b, rows[0]);
+  return {rows, totalFame, active, ascend, expel, obs, mvp};
+}
+function roleBadge(r) {
+  const m = {leader:['b-leader','👑 Líder'], coLeader:['b-coleader','⚜️ Colíder'], elder:['b-elder','⭐ Veterano'], member:['b-member','🛡️ Miembro']};
+  const [cls, lbl] = m[r] || m.member;
+  return `<span class="badge ${cls}">${lbl}</span>`;
+}
+function vBadge(v) {
+  const m = {ascend:['b-ascend','⬆ Asciende'], keep:['b-keep','✔ Se mantiene'], expel:['b-expel','❌ Expulsión'], observation:['b-obs','🆕 Observación']};
+  const [cls, lbl] = m[v] || m.keep;
+  return `<span class="badge ${cls}">${lbl}</span>`;
+}
+function trophyHtml(t) {
+  if (t >= 10000) return `<span style="color:#ffd700;font-weight:600">💎 ${t.toLocaleString()}</span>`;
+  if (t >= 5000) return `<span style="color:#90caf9">${t.toLocaleString()}</span>`;
+  return `<span style="color:var(--muted)">${t.toLocaleString()}</span>`;
+}
+function deltaHtml(d) {
+  if (d === 0) return '<span class="t-eq">= 0</span>';
+  return d > 0 ? `<span class="t-up">▲ +${d}</span>` : `<span class="t-dn">▼ ${d}</span>`;
+}
+function suggestAction(r, weekId) {
+  const v = r.verdict;
+  if (v === "expel") return r.role === "elder" ? "⬇️ Degradar → Miembro" : r.role === "coLeader" ? "⬇️ Degradar → Veterano" : "❌ Expulsar";
+  if (v === "ascend" && r.role === "member") return "⬆️ Ascender → Veterano";
+  if (v === "ascend" && r.role === "elder") return "⬆️ Considerar Colíder";
+  return "🔄 Mantener";
+}
+function fameColor(f) {
+  return f >= 2300 ? "#00d97e" : f > 1800 ? "#f5c518" : f > 0 ? "#f02040" : "var(--hint)";
+}
 
-    const WEEK_ORDER = ["132-3", "132-2", "132-1"];
-    const tagToInfo = {};
-    rosterData.forEach(r => { tagToInfo[r.tag] = { name: r.name, role: r.role, trophies: r.trophies, lastSeen: r.lastSeen }; });
+// ── Render Semana ────────────────────────────────────────────────
+function renderWeekly(weekId) {
+  const {rows, totalFame, active, ascend, expel, obs, mvp} = buildWeekData(weekId);
+  const prevIdx = WEEKS.indexOf(weekId) + 1;
+  const prev = prevIdx < WEEKS.length ? buildWeekData(WEEKS[prevIdx]) : null;
+  const avgEfic = Math.round(rows.filter(r=>r.efic>0).reduce((s,r)=>s+r.efic,0) / (rows.filter(r=>r.efic>0).length||1));
 
-    const ALL_WEEKS = {};
-    WEEK_ORDER.forEach(week => { ALL_WEEKS[week] = { players: [], total_fame: 0, active: 0, ascend: 0, expel: 0, in_obs: 0, mvp_name: "", mvp_fame: 0 }; });
+  // KPIs
+  const kpis = [
+    {t:'⚔️ FAMA TOTAL', v: totalFame.toLocaleString(), tr: prev ? totalFame - prev.totalFame : 0, cls:''},
+    {t:'🛡️ ACTIVOS',    v: `${active} / ${PLAYERS.length}`, tr: 0, cls:'blue'},
+    {t:'⬆️ ASCENSOS',   v: ascend, tr: prev ? ascend - prev.ascend : 0, cls:'green'},
+    {t:'❌ EXPULSIONES', v: expel, tr: prev ? expel - prev.expel : 0, inv: true, cls:'red'},
+    {t:'🆕 OBSERVACIÓN', v: obs, tr: 0, cls:'purple'},
+    {t:'⚡ EFIC. PROM.', v: avgEfic, sub:'fama/mazo', tr: 0, cls:''},
+    {t:'👑 MVP',         v: mvp.name.length > 11 ? mvp.name.slice(0,11)+'…' : mvp.name, sub: mvp.fame.toLocaleString()+' pts', tr: 0, cls:''},
+  ];
+  document.getElementById('kpiContainer').innerHTML = kpis.map(k => `
+    <div class="kpi-card ${k.cls}">
+      <div class="kpi-title">${k.t}</div>
+      <div class="kpi-value">${k.v}</div>
+      ${k.sub ? `<div class="kpi-sub">${k.sub}</div>` : ''}
+      ${k.tr !== 0 ? `<div class="kpi-trend"><span class="${(k.inv?k.tr<0:k.tr>0)?'t-up':'t-dn'}">${k.tr>0?'▲':'▼'} ${Math.abs(k.tr)}</span><span style="color:var(--hint);margin-left:2px">vs ant.</span></div>` : ''}
+    </div>`).join('');
 
-    for (const [tag, info] of Object.entries(tagToInfo)) {
-        for (let i = 0; i < WEEK_ORDER.length; i++) {
-            const week = WEEK_ORDER[i];
-            const fame = warData[tag]?.[week] || 0;
-            const prevWeek = WEEK_ORDER[i + 1];
-            const prevFame = prevWeek ? (warData[tag]?.[prevWeek] || 0) : 0;
-            const isNew = (prevFame === 0 && fame > 0) || (prevFame === 0 && i === 0 && fame === 0);
-            let verdict = "keep";
-            if (fame >= 2300) verdict = "ascend";
-            else if (fame <= 1800 && fame > 0) verdict = "expel";
-            else if (fame === 0 && !isNew) verdict = "expel";
-            else if (fame === 0 && isNew) verdict = "observation";
-            if (isNew && fame <= 1800) verdict = "observation";
+  // Leaderboard
+  const top5 = [...rows].filter(r=>r.fame>0).sort((a,b)=>b.fame-a.fame).slice(0,5);
+  const maxF = top5[0]?.fame || 1;
+  document.getElementById('leaderboard').innerHTML = `<div class="section-title">🎖️ LEADERBOARD — Semana ${weekId}</div>` +
+    top5.map((p,i) => `<div class="lb-item">
+      <div class="lb-rank">${['👑','🥈','🥉','4°','5°'][i]}</div>
+      <div class="lb-name">${p.name}</div>
+      <div class="lb-bar-bg"><div class="lb-bar-fill" style="width:${Math.round(p.fame/maxF*100)}%"></div></div>
+      <div class="lb-fame">${p.fame.toLocaleString()}</div>
+    </div>`).join('');
 
-            const playerObj = { name: info.name, tag, fame, prevFame, delta: fame - prevFame, pct: fame > 0 ? 100 : 0, isNew, verdict, role: info.role, trophies: info.trophies, lastSeen: info.lastSeen };
-            ALL_WEEKS[week].players.push(playerObj);
-            if (fame > 0) ALL_WEEKS[week].total_fame += fame;
-            if (verdict === "ascend") ALL_WEEKS[week].ascend++;
-            if (verdict === "expel") ALL_WEEKS[week].expel++;
-            if (verdict === "observation") ALL_WEEKS[week].in_obs++;
-            if (fame > ALL_WEEKS[week].mvp_fame) { ALL_WEEKS[week].mvp_fame = fame; ALL_WEEKS[week].mvp_name = info.name; }
-        }
-        ALL_WEEKS[WEEK_ORDER[0]].active = rosterData.length;
-    }
+  // Top Changes
+  const improved = [...rows].filter(r=>r.delta>0).sort((a,b)=>b.delta-a.delta).slice(0,5);
+  const declined = [...rows].filter(r=>r.delta<0).sort((a,b)=>a.delta-b.delta).slice(0,5);
+  document.getElementById('topChanges').innerHTML = `
+    <div class="change-card" style="border-color:var(--green)"><h4 style="color:var(--green)">📈 Top 5 Mejora</h4>${improved.map(p=>`<div class="change-item"><span>${p.name}</span><span class="t-up">▲ +${p.delta}</span></div>`).join('')||'<div style="font-size:.75rem;color:var(--hint)">Ninguno</div>'}</div>
+    <div class="change-card" style="border-color:var(--red)"><h4 style="color:var(--red)">📉 Top 5 Caída</h4>${declined.map(p=>`<div class="change-item"><span>${p.name}</span><span class="t-dn">▼ ${p.delta}</span></div>`).join('')||'<div style="font-size:.75rem;color:var(--hint)">Ninguno</div>'}</div>
+    <div class="change-card" style="border-color:var(--gold)"><h4 style="color:var(--gold)">🔥 Rachas activas</h4>${[...PLAYERS].map(p=>({n:p.name,s:streak(p)})).filter(x=>x.s>=3).sort((a,b)=>b.s-a.s).slice(0,5).map(x=>`<div class="change-item"><span>${x.n}</span><span class="streak">🔥 ${x.s}</span></div>`).join('')||'<div style="font-size:.75rem;color:var(--hint)">Ninguna racha ≥3</div>'}</div>`;
 
-    let currentWeek = "132-3";
-    let currentSort = { column: "fame", direction: "desc" };
-    let charts = {};
+  // Insight
+  const risk = rows.filter(r=>r.verdict==='keep' && r.fame<2100 && r.fame>0).slice(0,3);
+  const perfect = rows.filter(r=>r.decks===16 && r.fame>=2300).length;
+  document.getElementById('insightMessage').innerHTML = `<strong>🤖 INSIGHT DEL LÍDER</strong><br>
+    ${risk.length ? `⚠️ Atención a <strong>${risk.map(r=>r.name).join(', ')}</strong> — cerca del límite de expulsión.` : '✅ Buen rendimiento general del clan esta semana.'}<br>
+    🏆 MVP: <strong>${mvp.name}</strong> con <strong style="color:var(--gold)">${mvp.fame.toLocaleString()} pts</strong> &nbsp;|&nbsp; ⚔️ <strong>${perfect}</strong> jugadores con 16/16 mazos y ≥2300 fama.`;
 
-    function renderWeekly(weekId) {
-        const data = ALL_WEEKS[weekId];
-        if (!data) return;
-        const prevData = ALL_WEEKS["132-2"];
+  // Tabla principal
+  const search = document.getElementById('weeklySearch').value.toLowerCase();
+  const roleF = document.getElementById('roleFilter').value;
+  const trophyF = document.getElementById('trophyFilter').value;
+  const verdictF = document.getElementById('verdictFilter').value;
+  let filtered = rows.filter(r => {
+    if (search && !r.name.toLowerCase().includes(search)) return false;
+    if (roleF !== 'all' && r.role !== roleF) return false;
+    if (trophyF === '10000+' && r.trophies < 10000) return false;
+    if (trophyF === '5000-9999' && (r.trophies < 5000 || r.trophies >= 10000)) return false;
+    if (trophyF === '0-4999' && r.trophies >= 5000) return false;
+    if (verdictF !== 'all' && r.verdict !== verdictF) return false;
+    return true;
+  });
+  filtered.sort((a,b) => {
+    const va = a[sortCol], vb = b[sortCol];
+    if (sortCol === 'name') return sortDir * a.name.localeCompare(b.name);
+    if (sortCol === 'verdict') return sortDir * a.verdict.localeCompare(b.verdict);
+    return sortDir * ((+va||0) - (+vb||0));
+  });
+  const maxFame = Math.max(...rows.map(r=>r.fame), 1);
+  document.getElementById('mainTbody').innerHTML = filtered.map((p, i) => {
+    const pct = Math.round(p.fame / maxFame * 100);
+    const fc = fameColor(p.fame);
+    const streakVal = p.streak;
+    return `<tr>
+      <td style="color:var(--hint);font-size:.68rem">${i+1}</td>
+      <td style="font-weight:600;white-space:nowrap">${p.name}</td>
+      <td>${roleBadge(p.role)}</td>
+      <td>${trophyHtml(p.trophies)}</td>
+      <td><div class="fame-cell"><span style="min-width:38px;font-weight:700;color:${fc}">${p.fame.toLocaleString()}</span><div class="fame-bar-bg"><div class="fame-bar-fill" style="width:${pct}%;background:${fc}"></div></div></div></td>
+      <td style="text-align:center;${p.decks<16&&p.decks>0?'color:var(--obs)':''}">${p.decks}/16</td>
+      <td style="color:var(--muted)">${p.efic>0?p.efic:'—'}</td>
+      <td>${streakVal>=3?`<span class="streak">🔥 ${streakVal}</span>`:streakVal>0?`<span style="font-size:.7rem;color:var(--muted)">${streakVal}</span>`:'<span style="color:var(--hint)">—</span>'}</td>
+      <td>${deltaHtml(p.delta)}</td>
+      <td>${vBadge(p.verdict)}</td>
+      <td style="font-size:.7rem;color:var(--muted);white-space:nowrap">${suggestAction(p, weekId)}</td>
+    </tr>`;
+  }).join('');
 
-        const kpis = [
-            { title: "🏆 FAMA TOTAL", val: data.total_fame.toLocaleString(), trend: prevData ? data.total_fame - prevData.total_fame : 0 },
-            { title: "🛡️ MIEMBROS", val: data.active, trend: prevData ? data.active - prevData.active : 0 },
-            { title: "⬆️ ASCENSOS", val: data.ascend, trend: prevData ? data.ascend - prevData.ascend : 0 },
-            { title: "❌ EXPULSIONES", val: data.expel, trend: prevData ? data.expel - prevData.expel : 0 },
-            { title: "🆕 OBSERVACIÓN", val: data.in_obs, trend: 0 },
-            { title: "👑 MVP", val: `${data.mvp_name} · ${data.mvp_fame}`, trend: 0 }
-        ];
-        document.getElementById("kpiContainer").innerHTML = kpis.map(k => `<div class="kpi-card" style="border-left-color:#f5c518"><div class="kpi-title">${k.title}</div><div class="kpi-value">${k.val}</div>${k.trend !== 0 ? `<div class="kpi-trend"><span class="${k.trend > 0 ? 'trend-up' : 'trend-down'}">${k.trend > 0 ? '▲' : '▼'} ${Math.abs(k.trend)}</span> vs ant</div>` : ""}</div>`).join("");
+  // Comparativa
+  document.getElementById('compTbody').innerHTML = [...rows].filter(r=>r.prevFame>0||r.fame>0).sort((a,b)=>b.fame-a.fame).slice(0,25).map(r=>`<tr>
+    <td style="font-weight:600">${r.name}</td>
+    <td style="color:var(--gold);font-weight:700">${r.fame.toLocaleString()}</td>
+    <td>${r.prevFame.toLocaleString()}</td>
+    <td>${r.decks}/16</td>
+    <td>${deltaHtml(r.delta)}</td>
+    <td>${r.delta>0?'📈 Mejora':r.delta<0?'📉 Baja':'➡️ Igual'}</td>
+  </tr>`).join('');
 
-        const top5 = [...data.players].filter(p => p.fame > 0).sort((a, b) => b.fame - a.fame).slice(0, 5);
-        const maxFame = top5[0]?.fame || 1;
-        document.getElementById("leaderboard").innerHTML = `<h3>🎖️ LEADERBOARD — ${weekId}</h3>${top5.map((p, i) => `<div class="lb-item"><div class="lb-rank">${i === 0 ? "👑" : i === 1 ? "🥈" : i === 2 ? "🥉" : "🎖️"}</div><div class="lb-name">${p.name}</div><div class="progress-bar-bg"><div class="progress-fill" style="width:${(p.fame / maxFame) * 100}%"></div></div><div class="lb-fame">${p.fame}</div></div>`).join("")}`;
+  // Inactivos
+  const inactive = PLAYERS.map(p => {
+    if (!p.lastSeen) return null;
+    const ls = p.lastSeen.replace(/\.\d{3}Z/,'Z');
+    const fixed = ls.replace(/(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})/,'$1-$2-$3T$4:$5:$6');
+    try {
+      const days = Math.floor((Date.now() - new Date(fixed)) / 864e5);
+      return days > 7 ? {...p, days, dateStr: fixed.slice(0,10)} : null;
+    } catch(e) { return null; }
+  }).filter(Boolean).sort((a,b) => b.days - a.days);
+  const curRow = weekId;
+  document.getElementById('inactiveTbody').innerHTML = inactive.length
+    ? inactive.map(p => {
+        const fame = p.weeks[curRow]?.fame||0;
+        return `<tr>
+          <td style="font-weight:600">${p.name}</td>
+          <td style="color:var(--muted)">${p.dateStr}</td>
+          <td style="color:${p.days>14?'var(--red)':'var(--obs)'}">${p.days} días</td>
+          <td style="color:${fameColor(fame)};font-weight:700">${fame.toLocaleString()}</td>
+          <td style="font-size:.72rem;color:var(--obs)">⚠️ Revisar expulsión</td>
+        </tr>`;}).join('')
+    : '<tr><td colspan="5" style="text-align:center;color:var(--hint);padding:1rem">✅ Sin jugadores inactivos por más de 7 días</td></tr>';
+}
 
-        const filterVal = document.getElementById("weeklySearch").value.toLowerCase();
-        const roleFilter = document.getElementById("roleFilter").value;
-        const trophyFilter = document.getElementById("trophyFilter").value;
-        let filtered = data.players.filter(p => {
-            if (!p.name.toLowerCase().includes(filterVal)) return false;
-            if (roleFilter !== "all" && p.role !== roleFilter) return false;
-            if (trophyFilter === "0-4999" && p.trophies >= 5000) return false;
-            if (trophyFilter === "5000-9999" && (p.trophies < 5000 || p.trophies >= 10000)) return false;
-            if (trophyFilter === "10000+" && p.trophies < 10000) return false;
-            return true;
-        });
-        filtered.sort((a, b) => b.fame - a.fame);
-        document.querySelector("#mainTable tbody").innerHTML = filtered.map(p => {
-            let badgeClass = "", verdictText = "";
-            if (p.verdict === "ascend") { badgeClass = "badge-ascend"; verdictText = "⬆ Asciende"; }
-            else if (p.verdict === "keep") { badgeClass = "badge-keep"; verdictText = "✔ Se mantiene"; }
-            else if (p.verdict === "expel") { badgeClass = "badge-expel"; verdictText = "❌ Expulsión"; }
-            else if (p.verdict === "observation") { badgeClass = "badge-observation"; verdictText = "🆕 Observación"; }
-            let suggestion = p.role;
-            if (p.verdict === "expel") suggestion = p.role === "elder" ? "⬇️ Degradar a Miembro" : (p.role === "coLeader" ? "⬇️ Degradar a Veterano" : "❌ Expulsar");
-            else if (p.verdict === "ascend" && p.role === "member") suggestion = "⬆️ Ascender a Veterano";
-            else suggestion = `${p.role}`;
-            return `<tr><td style="font-weight:600;">${p.name}</td><td>${p.trophies}</td><td>${p.role}</td><td style="color:#f5c518; font-weight:bold;">${p.fame}</td><td>${p.pct}%</td><td class="${p.delta >= 0 ? 'trend-up' : 'trend-down'}">${p.delta >= 0 ? '▲' : '▼'} ${Math.abs(p.delta)}</td><td><span class="badge ${badgeClass}">${verdictText}</span></td><td>${suggestion}</td></tr>`;
-        }).join("");
+// ── Render Histórica ─────────────────────────────────────────────
+function renderHistorical() {
+  const search = document.getElementById('historicalSearch').value.toLowerCase();
+  const sortBy = document.getElementById('hmSortSel').value;
+  let arr = PLAYERS.map(p => {
+    const active = WEEKS.filter(w => p.weeks[w].fame > 0);
+    const avg = active.length ? Math.round(active.reduce((s,w)=>s+p.weeks[w].fame,0)/active.length) : 0;
+    return {...p, _avg: avg, _cons: consistency(p)};
+  }).filter(p => p.name.toLowerCase().includes(search));
+  if (sortBy === 'total') arr.sort((a,b)=>b.total_fame-a.total_fame);
+  else if (sortBy === 'avg') arr.sort((a,b)=>b._avg-a._avg);
+  else if (sortBy === 'consistency') arr.sort((a,b)=>b._cons-a._cons);
+  else arr.sort((a,b)=>a.name.localeCompare(b.name));
 
-        const compHtml = data.players.filter(p => p.prevFame > 0 || p.fame > 0).slice(0, 15).map(p => `<tr><td style="font-weight:600;">${p.name}</td><td style="color:#f5c518; font-weight:bold;">${p.fame}</td><td>${p.prevFame}</td><td class="${p.delta >= 0 ? 'trend-up' : 'trend-down'}">${p.delta >= 0 ? '▲' : '▼'} ${Math.abs(p.delta)}</td><td>${p.delta >= 0 ? "📈 Mejora" : "📉 Empeora"}</td></tr>`).join("");
-        document.querySelector("#compTable tbody").innerHTML = compHtml;
+  document.getElementById('hmHead').innerHTML = `<tr>
+    <th style="position:sticky;left:0;z-index:2;background:var(--bg2)">👤 Jugador</th>
+    ${WEEKS.map(w=>`<th>${w}</th>`).join('')}
+    <th>📊 Total</th><th>⭐ Prom.</th><th>✅ Cons.</th>
+  </tr>`;
+  document.getElementById('hmBody').innerHTML = arr.map(p => {
+    const cells = WEEKS.map(w => {
+      const f = p.weeks[w]?.fame || 0;
+      if (!f) return `<td class="hm-cell hm-na">—</td>`;
+      const cls = f>=2300?'hm-gold':f>=1801?'hm-keep':'hm-expel';
+      return `<td class="hm-cell ${cls}">${f.toLocaleString()}</td>`;
+    }).join('');
+    return `<tr>
+      <td style="font-weight:600;white-space:nowrap;position:sticky;left:0;background:var(--bg2);z-index:1">${p.name}</td>
+      ${cells}
+      <td style="font-weight:700;color:var(--gold)">${p.total_fame.toLocaleString()}</td>
+      <td style="color:var(--muted)">${p._avg.toLocaleString()}</td>
+      <td>${p._cons>0?`<span class="streak">✅ ${p._cons}</span>`:'<span style="color:var(--hint)">0</span>'}</td>
+    </tr>`;
+  }).join('');
+}
 
-        const inactive = data.players.filter(p => p.lastSeen).map(p => {
-            const lastDate = new Date(p.lastSeen.replace(/(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})/, "$1-$2-$3T$4:$5:$6Z"));
-            const days = Math.floor((new Date() - lastDate) / (1000 * 60 * 60 * 24));
-            return { ...p, days };
-        }).filter(p => p.days > 7);
-        document.querySelector("#inactiveTable tbody").innerHTML = inactive.map(p => `<tr><td style="font-weight:600;">${p.name}</td><td>${p.lastSeen.slice(0, 10)}</td><td>${p.days} días</td><td>⚠️ Sugerir expulsión</td>`);
+// ── Render Ranking ───────────────────────────────────────────────
+function renderRanking() {
+  const criteria = document.getElementById('rankCriteria').value;
+  const weekId = currentWeek;
+  const data = PLAYERS.map(p => {
+    const w = p.weeks[weekId] || {fame:0, decks:0};
+    const _streak = streak(p);
+    const _cons = consistency(p);
+    const _avg = avgFame(p);
+    const _eficAvg = (() => {
+      const ws = WEEKS.filter(wk=>p.weeks[wk].decks>0);
+      if (!ws.length) return 0;
+      return Math.round(ws.reduce((s,wk)=>s+eficiency(p.weeks[wk].fame,p.weeks[wk].decks),0)/ws.length);
+    })();
+    const _part = WEEKS.filter(wk=>p.weeks[wk].fame>0).length;
+    return {...p, _streak, _cons, _avg, _eficAvg, _part,
+      _score: criteria==='total_fame'?p.total_fame:criteria==='avg_fame'?_avg:criteria==='consistency'?_cons:criteria==='streak'?_streak:criteria==='eficiency'?_eficAvg:_part};
+  }).sort((a,b)=>b._score-a._score);
 
-        const improved = [...data.players].filter(p => p.delta > 0).sort((a, b) => b.delta - a.delta).slice(0, 5);
-        const declined = [...data.players].filter(p => p.delta < 0).sort((a, b) => a.delta - b.delta).slice(0, 5);
-        document.getElementById("topChanges").innerHTML = `<div class="comparison-card"><h4>📈 TOP 5 MEJORA</h4>${improved.map(p => `<div>${p.name}: <span class="trend-up">▲ +${p.delta}</span></div>`).join("") || "<div>Ninguno</div>"}</div><div class="comparison-card"><h4>📉 TOP 5 CAÍDA</h4>${declined.map(p => `<div>${p.name}: <span class="trend-down">▼ ${-p.delta}</span></div>`).join("") || "<div>Ninguno</div>"}</div>`;
+  const labels = {total_fame:'Fama total',avg_fame:'Prom. fama',consistency:'Semanas ≥2300',streak:'Racha activa',eficiency:'Efic. promedio',participation:'Semanas activas'};
+  const icons = {total_fame:'⚔️',avg_fame:'📊',consistency:'✅',streak:'🔥',eficiency:'⚡',participation:'📆'};
 
-        const riskPlayers = data.players.filter(p => p.verdict === "keep" && p.fame < 2100).slice(0, 3);
-        document.getElementById("insightMessage").innerHTML = `<strong>🤖 INSIGHT DEL LÍDER</strong><br>${riskPlayers.length ? `⚠️ Presta atención a ${riskPlayers.map(p => p.name).join(", ")} - están cerca del límite de expulsión.` : "✅ Buen rendimiento general. ¡Sigue así!"}<br>🏆 <strong>MVP de la semana:</strong> ${data.mvp_name} con <strong style="color:#f5c518;">${data.mvp_fame} pts</strong>.`;
-    }
+  document.getElementById('rankingGrid').innerHTML = data.map((p,i) => {
+    const medal = i===0?'🥇':i===1?'🥈':i===2?'🥉':`#${i+1}`;
+    const w = p.weeks[weekId]||{fame:0,decks:0};
+    return `<div class="rank-card">
+      <div class="rank-card-top">
+        <div class="rank-num">${medal}</div>
+        <div>
+          <div class="rank-name">${p.name}</div>
+          <div class="rank-sub">${roleBadge(p.role)}</div>
+        </div>
+      </div>
+      <div style="font-family:'Rajdhani',sans-serif;font-size:1.4rem;font-weight:800;color:var(--gold);margin-bottom:.5rem">${icons[criteria]} ${p._score.toLocaleString()} <small style="font-size:.7rem;color:var(--muted)">${labels[criteria]}</small></div>
+      <div class="rank-stats">
+        <div class="rank-stat">Total: <span>${p.total_fame.toLocaleString()}</span></div>
+        <div class="rank-stat">Prom: <span>${p._avg.toLocaleString()}</span></div>
+        <div class="rank-stat">Racha: <span>${p._streak>0?'🔥'+p._streak:'—'}</span></div>
+        <div class="rank-stat">Cons: <span>${p._cons}/10</span></div>
+      </div>
+    </div>`;
+  }).join('');
+}
 
-    function renderHistorical() {
-        const search = document.getElementById("historicalSearch").value.toLowerCase();
-        const playersMap = new Map();
-        for (const [tag, info] of Object.entries(tagToInfo)) {
-            const weeksData = warData[tag] || {};
-            let total = 0, weeksCnt = 0, weekValues = [];
-            WEEK_ORDER.forEach(w => { let val = weeksData[w] || 0; if (val > 0) { total += val; weeksCnt++; } weekValues.push(val > 0 ? val : null); });
-            const avg = weeksCnt ? Math.round(total / weeksCnt) : 0;
-            playersMap.set(info.name, { name: info.name, weeks: weekValues, total, avg });
-        }
-        const arr = Array.from(playersMap.values()).filter(p => p.name.toLowerCase().includes(search));
-        const headers = `<th>👤 Jugador</th>${WEEK_ORDER.map(w => `<th>${w}</th>`).join("")}<th>📊 Total</th><th>⭐ Promedio</th>`;
-        document.getElementById("heatmapHead").innerHTML = `<tr>${headers}</table>`;
-        document.getElementById("heatmapBody").innerHTML = arr.map(p => {
-            const cells = WEEK_ORDER.map((w, idx) => {
-                const val = p.weeks[idx];
-                if (val === null) return `<td class="heatmap-cell heatmap-na">—</td>`;
-                let cls = val >= 2300 ? "heatmap-ascend" : (val >= 1801 ? "heatmap-keep" : "heatmap-expel");
-                return `<td class="heatmap-cell ${cls}">${val}</td>`;
-            }).join("");
-            return `<tr><td style="font-weight:600; position:sticky; left:0; background:#0c111a;">${p.name}</td>${cells}<td><strong>${p.total}</strong></td><td>${p.avg}</td></tr>`;
-        }).join("");
-    }
+// ── Render Analytics ─────────────────────────────────────────────
+function renderAnalytics() {
+  const {rows} = buildWeekData(currentWeek);
 
-    function renderAnalytics() {
-        const data = ALL_WEEKS["132-3"];
-        const playersWithFame = data.players.filter(p => p.fame > 0);
-        
-        // Gráfica 1: Eficiencia (Fama por mazo)
-        const efficiencyData = playersWithFame.map(p => ({ name: p.name, efficiency: p.fame / 16, fame: p.fame })).sort((a, b) => b.efficiency - a.efficiency).slice(0, 12);
-        if (charts.efficiency) charts.efficiency.destroy();
-        charts.efficiency = new Chart(document.getElementById("efficiencyChart"), {
-            type: "bar",
-            data: { labels: efficiencyData.map(d => d.name), datasets: [{ label: "Fama por mazo (max 206.25)", data: efficiencyData.map(d => d.efficiency), backgroundColor: "rgba(245, 197, 24, 0.7)", borderColor: "#f5c518", borderWidth: 1 }] },
-            options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { position: "top" } } }
-        });
-        document.getElementById("efficiencyList").innerHTML = efficiencyData.slice(0, 10).map((d, i) => `<div style="background:rgba(245,197,24,0.1); padding:6px 10px; border-radius:12px;"><strong>${i+1}.</strong> ${d.name} — <span style="color:#f5c518; font-weight:bold;">${d.efficiency.toFixed(1)}</span> fama/mazo (${d.fame} pts)</div>`).join("");
-        
-        // Gráfica 2: Participación del clan
-        const fullParticipation = data.players.filter(p => p.fame > 0 && p.pct === 100).length;
-        const partialParticipation = data.players.filter(p => p.fame > 0 && p.pct < 100).length;
-        const noParticipation = data.players.filter(p => p.fame === 0 && !p.isNew).length;
-        if (charts.participation) charts.participation.destroy();
-        charts.participation = new Chart(document.getElementById("participationChart"), {
-            type: "doughnut",
-            data: { labels: ["✅ 16/16 mazos", "⚠️ Participación parcial", "❌ Sin participación"], datasets: [{ data: [fullParticipation, partialParticipation, noParticipation], backgroundColor: ["#00d97e", "#f5c518", "#f02040"] }] },
-            options: { responsive: true, plugins: { legend: { position: "bottom" } } }
-        });
-        
-        // Gráfica 3: Consistencia (Top 5 vs Bottom 5)
-        const weeklyAverages = [];
-        for (let i = 0; i < WEEK_ORDER.length; i++) {
-            const weekData = ALL_WEEKS[WEEK_ORDER[i]];
-            const top5Avg = weekData.players.filter(p => p.fame > 0).sort((a, b) => b.fame - a.fame).slice(0, 5).reduce((s, p) => s + p.fame, 0) / 5;
-            const bottom5WithFame = weekData.players.filter(p => p.fame > 0).sort((a, b) => a.fame - b.fame).slice(0, 5);
-            const bottom5Avg = bottom5WithFame.length ? bottom5WithFame.reduce((s, p) => s + p.fame, 0) / bottom5WithFame.length : 0;
-            weeklyAverages.push({ week: WEEK_ORDER[i], top5: top5Avg, bottom5: bottom5Avg });
-        }
-        if (charts.consistency) charts.consistency.destroy();
-        charts.consistency = new Chart(document.getElementById("consistencyChart"), {
-            type: "line",
-            data: { labels: weeklyAverages.map(w => w.week), datasets: [{ label: "🏆 Top 5 (promedio)", data: weeklyAverages.map(w => w.top5), borderColor: "#f5c518", backgroundColor: "rgba(245,197,24,0.1)", tension: 0.3, fill: true }, { label: "⚠️ Bottom 5 (promedio)", data: weeklyAverages.map(w => w.bottom5), borderColor: "#f02040", backgroundColor: "rgba(240,32,64,0.1)", tension: 0.3, fill: true }] },
-            options: { responsive: true, plugins: { tooltip: { callbacks: { label: (ctx) => `${ctx.dataset.label}: ${ctx.raw.toFixed(0)} pts` } } } }
-        });
-    }
+  // Eficiencia
+  const effData = [...rows].filter(r=>r.decks>0).sort((a,b)=>b.efic-a.efic).slice(0,12);
+  if (charts.eff) charts.eff.destroy();
+  charts.eff = new Chart(document.getElementById('effChart'), {
+    type:'bar',
+    data:{labels:effData.map(d=>d.name.length>9?d.name.slice(0,9)+'…':d.name),
+      datasets:[{label:'Fama/mazo',data:effData.map(d=>d.efic),
+        backgroundColor:effData.map(d=>d.efic>=200?'rgba(0,217,126,.75)':d.efic>=150?'rgba(245,197,24,.75)':'rgba(41,121,255,.75)'),
+        borderRadius:5,borderSkipped:false}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{x:{ticks:{color:'#8e9bb5',font:{size:9.5}},grid:{display:false}},y:{ticks:{color:'#8e9bb5',font:{size:9}},grid:{color:'rgba(255,255,255,.06)'}}}}
+  });
+  document.getElementById('effList').innerHTML = effData.slice(0,10).map((d,i)=>`
+    <div class="eff-item"><span><strong>${i+1}.</strong> ${d.name}</span><span class="eff-val">${d.efic} <small style="font-size:.6rem;color:var(--muted)">f/m</small></span></div>`).join('');
 
-    function initSelect() {
-        const sel = document.getElementById("weekSelect");
-        sel.innerHTML = WEEK_ORDER.map((w, i) => `<option value="${w}" ${i === 0 ? "selected" : ""}>${w} ${i === 0 ? "⭐ Actual" : `· ${ALL_WEEKS[w]?.total_fame || 0} fama`}</option>`).join("");
-        sel.addEventListener("change", (e) => { currentWeek = e.target.value; renderWeekly(currentWeek); });
-    }
+  // Participación
+  const full=rows.filter(r=>r.decks>=16).length, partial=rows.filter(r=>r.decks>0&&r.decks<16).length, none=rows.filter(r=>r.decks===0).length;
+  if (charts.part) charts.part.destroy();
+  charts.part = new Chart(document.getElementById('partChart'), {
+    type:'doughnut',
+    data:{labels:['16/16 mazos','Parcial','Sin jugar'],datasets:[{data:[full,partial,none],backgroundColor:['#00d97e','#f5c518','#f02040'],borderWidth:0,hoverOffset:5}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},cutout:'65%'}
+  });
+  document.getElementById('partLegend').innerHTML = [['#00d97e',`16/16 (${full})`],['#f5c518',`Parcial (${partial})`],['#f02040',`Sin jugar (${none})`]].map(([c,l])=>`<span style="display:flex;align-items:center;gap:3px"><span style="width:9px;height:9px;border-radius:2px;background:${c}"></span>${l}</span>`).join('');
 
-    document.getElementById("weeklySearch").addEventListener("input", () => renderWeekly(currentWeek));
-    document.getElementById("roleFilter").addEventListener("change", () => renderWeekly(currentWeek));
-    document.getElementById("trophyFilter").addEventListener("change", () => renderWeekly(currentWeek));
-    document.getElementById("historicalSearch").addEventListener("input", () => renderHistorical());
-    document.getElementById("copyActionsBtn").addEventListener("click", () => {
-        const data = ALL_WEEKS[currentWeek];
-        const expel = data.players.filter(p => p.verdict === "expel").map(p => `- ${p.name} (${p.fame} pts)`).join("\n");
-        const obs = data.players.filter(p => p.verdict === "observation").map(p => `- ${p.name} (${p.fame} pts)`).join("\n");
-        const msg = `━━━━━━━━━━━━━━━━━━━━━\n⚔️ ELITE COLOMBIA\n📊 Semana ${currentWeek} — Reporte\n━━━━━━━━━━━━━━━━━━━━━\n\n❌ EXPULSIONES:\n${expel || "Ninguna"}\n\n🆕 OBSERVACIÓN:\n${obs || "Ninguno"}\n\n👑 MVP: ${data.mvp_name} — ${data.mvp_fame} pts`;
-        navigator.clipboard.writeText(msg);
-        alert("✅ Lista copiada al portapapeles");
-    });
-    document.getElementById("exportCSVBtn").addEventListener("click", () => {
-        const data = ALL_WEEKS[currentWeek];
-        let csv = "Jugador,Rol,Trofeos,Fama,Delta,Veredicto\n";
-        data.players.forEach(p => { csv += `${p.name},${p.role},${p.trophies},${p.fame},${p.delta},${p.verdict}\n`; });
-        const blob = new Blob([csv], { type: "text/csv" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `clan_${currentWeek}.csv`;
-        a.click();
-        URL.revokeObjectURL(url);
-    });
-    document.getElementById("themeToggle").addEventListener("click", () => {
-        document.body.classList.toggle("dark");
-        document.body.classList.toggle("light");
-        localStorage.setItem("theme", document.body.classList.contains("dark") ? "dark" : "light");
-    });
-    document.querySelectorAll(".collapsible").forEach(el => {
-        el.addEventListener("click", () => {
-            const target = document.getElementById(el.dataset.target);
-            target.classList.toggle("show");
-            el.classList.toggle("active");
-        });
-        const target = document.getElementById(el.dataset.target);
-        if (target) { target.classList.add("show"); el.classList.add("active"); }
-    });
-    document.querySelectorAll(".tab-btn").forEach(btn => {
-        btn.addEventListener("click", () => {
-            document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
-            btn.classList.add("active");
-            document.getElementById("weeklyTab").classList.toggle("active", btn.dataset.tab === "weekly");
-            document.getElementById("historicalTab").classList.toggle("active", btn.dataset.tab === "historical");
-            document.getElementById("analyticsTab").classList.toggle("active", btn.dataset.tab === "analytics");
-            if (btn.dataset.tab === "historical") renderHistorical();
-            if (btn.dataset.tab === "analytics") renderAnalytics();
-        });
-    });
-    document.addEventListener("keydown", (e) => {
-        if (e.ctrlKey && e.key === "f") { e.preventDefault(); document.getElementById("weeklySearch").focus(); }
-        if (e.ctrlKey && e.key === "h") { document.getElementById("themeToggle").click(); }
-    });
-    const savedTheme = localStorage.getItem("theme");
-    if (savedTheme === "light") document.body.classList.replace("dark", "light");
-    initSelect();
-    renderWeekly(currentWeek);
-    renderAnalytics();
+  // Consistencia
+  const weekAvgs = WEEKS.map(w => {
+    const fames = PLAYERS.map(p=>p.weeks[w]?.fame||0).filter(f=>f>0).sort((a,b)=>b-a);
+    return {w, top5:Math.round(fames.slice(0,5).reduce((s,f)=>s+f,0)/Math.min(5,fames.length||1)), bot5:Math.round(fames.slice(-5).reduce((s,f)=>s+f,0)/Math.min(5,fames.length||1))};
+  });
+  if (charts.consist) charts.consist.destroy();
+  charts.consist = new Chart(document.getElementById('consistChart'), {
+    type:'line',
+    data:{labels:weekAvgs.map(x=>x.w),datasets:[
+      {label:'Top 5 prom.',data:weekAvgs.map(x=>x.top5),borderColor:'#f5c518',backgroundColor:'rgba(245,197,24,.07)',tension:.3,fill:true,pointRadius:3,pointBackgroundColor:'#f5c518'},
+      {label:'Bottom 5 prom.',data:weekAvgs.map(x=>x.bot5),borderColor:'#f02040',backgroundColor:'rgba(240,32,64,.07)',tension:.3,fill:true,pointRadius:3,pointBackgroundColor:'#f02040'}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#8e9bb5',font:{size:10},boxWidth:10}}},
+      scales:{x:{ticks:{color:'#8e9bb5',font:{size:9}},grid:{color:'rgba(255,255,255,.05)'}},y:{ticks:{color:'#8e9bb5',font:{size:9}},grid:{color:'rgba(255,255,255,.05)'}}}}
+  });
+
+  // Veredictos
+  const vC = rows.reduce((acc,r)=>{acc[r.verdict]=(acc[r.verdict]||0)+1;return acc},{});
+  const vLabels=['ascend','keep','expel','observation'];
+  const vColors={ascend:'#f5c518cc',keep:'#2979ffcc',expel:'#f02040cc',observation:'#ff9800cc'};
+  const vNames={ascend:'Asciende',keep:'Se mantiene',expel:'Expulsión',observation:'Observación'};
+  if (charts.verdict) charts.verdict.destroy();
+  charts.verdict = new Chart(document.getElementById('verdictChart'), {
+    type:'bar',
+    data:{labels:vLabels.map(v=>vNames[v]),datasets:[{data:vLabels.map(v=>vC[v]||0),backgroundColor:vLabels.map(v=>vColors[v]),borderRadius:7,borderSkipped:false}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{x:{ticks:{color:'#8e9bb5',font:{size:10}},grid:{display:false}},y:{ticks:{color:'#8e9bb5',font:{size:9}},grid:{color:'rgba(255,255,255,.05)'}}}}
+  });
+  document.getElementById('verdictLegend').innerHTML = vLabels.map(v=>`<span style="display:flex;align-items:center;gap:3px"><span style="width:9px;height:9px;border-radius:2px;background:${vColors[v]}"></span>${vNames[v]} (${vC[v]||0})</span>`).join('');
+
+  // Evolución fama total
+  const trendData = WEEKS.map(w => ({w, total: PLAYERS.reduce((s,p)=>s+(p.weeks[w]?.fame||0),0)}));
+  if (charts.trend) charts.trend.destroy();
+  charts.trend = new Chart(document.getElementById('trendChart'), {
+    type:'line',
+    data:{labels:trendData.map(x=>x.w),datasets:[{label:'Fama total clan',data:trendData.map(x=>x.total),borderColor:'#f5c518',backgroundColor:'rgba(245,197,24,.08)',tension:.3,fill:true,pointRadius:4,pointBackgroundColor:'#f5c518',pointBorderColor:'#07101e',pointBorderWidth:2}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{x:{ticks:{color:'#8e9bb5',font:{size:9}},grid:{color:'rgba(255,255,255,.05)'}},y:{ticks:{color:'#8e9bb5',font:{size:9},callback:v=>v.toLocaleString()},grid:{color:'rgba(255,255,255,.05)'}}}}
+  });
+
+  // Distribución fama
+  const buckets = [[0,0,'Sin fama'],[1,999,'1-999'],[1000,1800,'1000-1800'],[1801,2299,'1801-2299'],[2300,9999,'≥2300']];
+  const bCounts = buckets.map(([lo,hi])=>rows.filter(r=>r.fame>=lo&&r.fame<=hi).length);
+  const bColors = ['rgba(100,100,120,.5)','rgba(240,32,64,.6)','rgba(255,152,0,.6)','rgba(41,121,255,.6)','rgba(0,217,126,.65)'];
+  if (charts.dist) charts.dist.destroy();
+  charts.dist = new Chart(document.getElementById('distChart'), {
+    type:'bar',
+    data:{labels:buckets.map(b=>b[2]),datasets:[{data:bCounts,backgroundColor:bColors,borderRadius:6,borderSkipped:false}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{x:{ticks:{color:'#8e9bb5',font:{size:9.5}},grid:{display:false}},y:{ticks:{color:'#8e9bb5',font:{size:9}},grid:{color:'rgba(255,255,255,.05)'}}}}
+  });
+}
+
+// ── Render Alertas ───────────────────────────────────────────────
+function renderAlerts() {
+  const {rows} = buildWeekData(currentWeek);
+  
+  // Cero participación SIEMPRE
+  const zeroAll = PLAYERS.filter(p => WEEKS.every(w => p.weeks[w].fame === 0));
+  // Cero en semana actual con historial
+  const zeroNow = rows.filter(r => r.fame === 0 && r.total_fame > 0);
+  // Expulsión esta semana
+  const expelNow = rows.filter(r => r.verdict === 'expel');
+  // Racha negativa (últimas 3 semanas bajando)
+  const dropping = PLAYERS.map(p => {
+    const vals = WEEKS.slice(0,3).map(w=>p.weeks[w]?.fame||0);
+    return vals[0]<vals[1]&&vals[1]<vals[2]&&vals[2]>0 ? {...p, vals} : null;
+  }).filter(Boolean);
+  // Mejora notable (esta semana vs anterior)
+  const {rows: curRows} = buildWeekData(currentWeek);
+  const topGainers = [...curRows].filter(r=>r.delta>=500).sort((a,b)=>b.delta-a.delta).slice(0,5);
+
+  let html = '';
+
+  if (expelNow.length) {
+    html += `<div class="alert-box" style="margin-bottom:1rem">
+      <div class="alert-title">❌ EXPULSIONES — Semana ${currentWeek} (${expelNow.length} jugadores)</div>
+      <div class="zero-grid">${expelNow.map(p=>`<div class="zero-card">
+        <div class="zero-name">${p.name}</div>
+        <div class="zero-weeks">${roleBadge(p.role)} · Fama: <strong style="color:var(--red)">${p.fame}</strong> · ${suggestAction(p, currentWeek)}</div>
+      </div>`).join('')}</div></div>`;
+  }
+  if (zeroNow.length) {
+    html += `<div class="alert-box" style="background:rgba(255,152,0,.06);border-color:var(--obs);margin-bottom:1rem">
+      <div class="alert-title" style="color:var(--obs)">⚠️ INACTIVOS ESTA SEMANA — Con historial previo (${zeroNow.length})</div>
+      <div class="zero-grid">${zeroNow.map(p=>`<div class="zero-card" style="background:rgba(255,152,0,.05);border-color:rgba(255,152,0,.2)">
+        <div class="zero-name">${p.name}</div>
+        <div class="zero-weeks">Total acumulado: <strong>${p.total_fame.toLocaleString()}</strong> pts · Mazos: 0</div>
+      </div>`).join('')}</div></div>`;
+  }
+  if (zeroAll.length) {
+    html += `<div class="alert-box" style="background:rgba(155,39,176,.06);border-color:var(--purple);margin-bottom:1rem">
+      <div class="alert-title" style="color:#ce9ef7">🚫 SIN PARTICIPACIÓN HISTÓRICA (${zeroAll.length} jugadores)</div>
+      <div class="zero-grid">${zeroAll.map(p=>`<div class="zero-card" style="background:rgba(155,39,176,.05);border-color:rgba(155,39,176,.2)">
+        <div class="zero-name">${p.name}</div>
+        <div class="zero-weeks">${roleBadge(p.role)} · 0 fama en ${WEEKS.length} semanas</div>
+      </div>`).join('')}</div></div>`;
+  }
+  if (dropping.length) {
+    html += `<div class="alert-box" style="background:rgba(255,152,0,.05);border-color:var(--obs);margin-bottom:1rem">
+      <div class="alert-title" style="color:var(--obs)">📉 TENDENCIA BAJISTA — 3 semanas consecutivas en caída</div>
+      <div class="zero-grid">${dropping.map(p=>`<div class="zero-card" style="background:rgba(255,152,0,.04);border-color:rgba(255,152,0,.18)">
+        <div class="zero-name">${p.name}</div>
+        <div class="zero-weeks">${p.vals.map((v,i)=>WEEKS[i]+': '+v).join(' → ')}</div>
+      </div>`).join('')}</div></div>`;
+  }
+  if (topGainers.length) {
+    html += `<div class="insight" style="border-color:var(--green);background:linear-gradient(135deg,rgba(0,217,126,.06),rgba(0,217,126,.02))">
+      <div style="font-family:'Rajdhani',sans-serif;color:var(--green);font-size:1rem;margin-bottom:.4rem">🌟 MEJORAS DESTACADAS esta semana</div>
+      ${topGainers.map(p=>`<strong>${p.name}</strong>: ${p.prevFame.toLocaleString()} → ${p.fame.toLocaleString()} (<span class="t-up">▲ +${p.delta}</span>)<br>`).join('')}
+    </div>`;
+  }
+  if (!html) html = `<div class="insight">✅ No hay alertas críticas esta semana. ¡El clan va bien!</div>`;
+  document.getElementById('alertsContent').innerHTML = html;
+}
+
+// ── Init & Event Listeners ───────────────────────────────────────
+function initSelect() {
+  const sel = document.getElementById('weekSelect');
+  sel.innerHTML = WEEKS.map((w,i)=>`<option value="${w}">${w}${i===0?' ⭐ Actual':''}</option>`).join('');
+  sel.addEventListener('change', e => { currentWeek = e.target.value; renderWeekly(currentWeek); });
+}
+
+document.querySelectorAll('.collapsible').forEach(el => {
+  el.addEventListener('click', () => {
+    const t = document.getElementById(el.dataset.target);
+    t.classList.toggle('show');
+    el.classList.toggle('open');
+  });
+});
+
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    ['weekly','historical','ranking','analytics','alerts'].forEach(t=>
+      document.getElementById(t+'Tab').classList.toggle('active', btn.dataset.tab===t));
+    if (btn.dataset.tab==='historical') renderHistorical();
+    if (btn.dataset.tab==='ranking') renderRanking();
+    if (btn.dataset.tab==='analytics') renderAnalytics();
+    if (btn.dataset.tab==='alerts') renderAlerts();
+  });
+});
+
+['weeklySearch','roleFilter','trophyFilter','verdictFilter'].forEach(id => {
+  document.getElementById(id)?.addEventListener('input', ()=>renderWeekly(currentWeek));
+  document.getElementById(id)?.addEventListener('change', ()=>renderWeekly(currentWeek));
+});
+document.getElementById('historicalSearch')?.addEventListener('input', renderHistorical);
+document.getElementById('hmSortSel')?.addEventListener('change', renderHistorical);
+document.getElementById('rankCriteria')?.addEventListener('change', renderRanking);
+
+document.addEventListener('click', e => {
+  const th = e.target.closest('th[data-sort]');
+  if (!th) return;
+  const col = th.dataset.sort;
+  if (sortCol === col) sortDir *= -1; else { sortCol = col; sortDir = -1; }
+  renderWeekly(currentWeek);
+});
+
+document.getElementById('copyActionsBtn').addEventListener('click', () => {
+  const {rows, mvp} = buildWeekData(currentWeek);
+  const expel = rows.filter(r=>r.verdict==='expel').map(r=>`- ${r.name} (${r.fame} pts · ${suggestAction(r,currentWeek)})`).join('\n');
+  const obs = rows.filter(r=>r.verdict==='observation').map(r=>`- ${r.name} (${r.fame} pts)`).join('\n');
+  const ascend = rows.filter(r=>r.verdict==='ascend'&&r.role==='member').map(r=>`- ${r.name} → Veterano`).join('\n');
+  const msg = `━━━━━━━━━━━━━━━━━━━━━\n⚔️ ELITE COLOMBIA\n📊 Semana ${currentWeek} — Reporte de Guerra\n━━━━━━━━━━━━━━━━━━━━━\n\n❌ EXPULSIONES / DEGRADACIONES:\n${expel||'Ninguna'}\n\n⬆️ ASCENSOS:\n${ascend||'Ninguno'}\n\n🆕 OBSERVACIÓN:\n${obs||'Ninguno'}\n\n👑 MVP: ${mvp.name} — ${mvp.fame.toLocaleString()} pts\n━━━━━━━━━━━━━━━━━━━━━`;
+  navigator.clipboard.writeText(msg).then(()=>alert('✅ Reporte copiado al portapapeles'));
+});
+
+document.getElementById('exportCSVBtn').addEventListener('click', () => {
+  const {rows} = buildWeekData(currentWeek);
+  let csv = '\uFEFFJugador,Rol,Trofeos,Fama,Mazos,Eficiencia,vs Anterior,Veredicto,Acción,Racha,Consistencia\n';
+  rows.forEach(r => { csv += `"${r.name}",${r.role},${r.trophies},${r.fame},${r.decks},${r.efic},${r.delta},${r.verdict},"${suggestAction(r,currentWeek)}",${r.streak},${r.consistency}\n`; });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+  a.download = `ELITE_COLOMBIA_${currentWeek}.csv`;
+  a.click();
+});
+
+document.getElementById('themeToggle').addEventListener('click', () => {
+  document.body.classList.toggle('dark');
+  document.body.classList.toggle('light');
+  const isL = document.body.classList.contains('light');
+  document.getElementById('themeToggle').textContent = isL ? '🌙 Modo Oscuro' : '🌓 Modo Claro';
+  localStorage.setItem('theme', isL?'light':'dark');
+});
+
+document.addEventListener('keydown', e => {
+  if (e.ctrlKey && e.key==='f') { e.preventDefault(); document.getElementById('weeklySearch').focus(); }
+  if (e.ctrlKey && e.key==='h') document.getElementById('themeToggle').click();
+});
+
+if (localStorage.getItem('theme')==='light') {
+  document.body.classList.replace('dark','light');
+  document.getElementById('themeToggle').textContent = '🌙 Modo Oscuro';
+}
+
+initSelect();
+renderWeekly(currentWeek);
 </script>
 </body>
-</html>
+</html> 
